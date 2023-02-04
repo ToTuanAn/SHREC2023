@@ -1,18 +1,10 @@
-import torch
-import random
-import math
-import os
 import torch.nn as nn
-from efficientnet import efficientnet0
-from pointnet import PointNet
-import numpy as np
-import torch.nn.functional as F
-from torch.utils.data import Dataset, DataLoader
-from torchvision import transforms, utils
+from model.efficientnet import efficientnet0
+from model.pointnet import PointNet
 
 output_embedding_size = 128
 point_net = PointNet(classes=output_embedding_size)
-efficient_net = efficientnet0(num_classes=output_embedding_size)
+efficient_net = efficientnet0()(num_classes=output_embedding_size)
 
 class SiameseNetwork(nn.Module):
     def __init__(self):
