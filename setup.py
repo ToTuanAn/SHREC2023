@@ -1,14 +1,9 @@
-"""Python setup.py for ep2 package"""
 import io
 import os
 from setuptools import find_packages, setup
 
 def read(*paths, **kwargs):
     """Read the contents of a text file safely.
-    >>> read("ep2", "VERSION")
-    '0.1.0'
-    >>> read("README.md")
-    ...
     """
 
     content = ""
