@@ -5,6 +5,7 @@ __pycache__
 checkpoints/
 tmp/
 build/
+outputs/
 *.pyc
 # weights
 *.pt

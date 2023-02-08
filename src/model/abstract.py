@@ -7,8 +7,17 @@ import torch
 from src.utils.device import detach
 
 class AbstractModel(pl.LightningModule):
-    def __init__(self):
+    def __init__(self, cfg):
         super().__init__()
+        self.cfg = cfg
+        self.init_model()
+    
+    @abc.abstractmethod
+    def init_model(self):
+        """
+        Function to initialize model
+        """
+        pass
     
     @abc.abstractmethod
     def forward(self, batch):

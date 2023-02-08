@@ -1,31 +1,30 @@
-from model.model import SiameseNetwork
-from loss import ContrastiveLoss
+import hydra
+import pytorch_lightning as pl
+from src.model import MODEL_REGISTRY
 import torch
 
-# Declare Siamese Network
-net = SiameseNetwork().cuda()
-# Decalre Loss Function
-criterion = ContrastiveLoss()
-# Declare Optimizer
-optimizer = torch.optim.Adam(net.parameters(), lr=1e-3, weight_decay=0.0005)
-#train the model
+@hydra.main(version_base=None, config_path="../configs", config_name="config")
+def train(config):
+    model = MODEL_REGISTRY.get(config.model.name)(config.model)
+    trainer = pl.Trainer(
+        default_root_dir=".",
+        max_epochs=config.trainer.num_epochs,
+        gpus=-1 if torch.cuda.device_count() else None,  # Use all gpus available
+        check_val_every_n_epoch=config.trainer.evaluate_interval,
+        log_every_n_steps=config.trainer.log_interval,
+        # enable_checkpointing=True,
+        accelerator="ddp" if torch.cuda.device_count() > 1 else None,
+        sync_batchnorm=True if torch.cuda.device_count() > 1 else False,
+        precision=16 if config.trainer.use_fp16 else 32,
+        # fast_dev_run=config["global"]["debug"],
+        # logger=Wlogger,
+        # callbacks=callbacks,
+        # num_sanity_val_steps=-1,  # Sanity full validation required for visualization callbacks
+        deterministic=True,
+        auto_lr_find=True,
+    )
 
-def train():
-    loss=[]
-    counter=[]
-    iteration_number = 0
-    for epoch in range(1,config.epochs):
-        for i, data in enumerate(train_dataloader,0):
-            img0, img1, label = data
-            img0, img1, label = img0.cuda(), img1.cuda() , label.cuda()
-            optimizer.zero_grad()
-            output1, output2 = net(img0,img1)
-            loss_contrastive = criterion(output1,output2,label)
-            loss_contrastive.backward()
-            optimizer.step()
-        print("Epoch {}\n Current loss {}\n".format(epoch, loss_contrastive.item()))
-        iteration_number += 10
-        counter.append(iteration_number)
-        loss.append(loss_contrastive.item())
-    #show_plot(counter, loss)
-    return net
+    trainer.fit(model, ckpt_path=config["global"]["resume"])
+
+if __name__ == "__main__":
+    train()
