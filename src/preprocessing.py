@@ -21,15 +21,6 @@ def read_off(file):
     faces = [[int(s) for s in file.readline().strip().split(' ')][1:] for i_face in range(n_faces)]
     return verts, faces
 
-
-def default_transforms():
-    return transforms.Compose([
-        PointSampler(1024),
-        Normalize(),
-        ToTensor()
-    ])
-
-
 def preprocessing_pc(off_path='./dataset/PC_OFF/'):
     for file in os.listdir(off_path):
         with open(os.path.join(off_path, file), 'r') as f:

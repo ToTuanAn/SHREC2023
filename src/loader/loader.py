@@ -6,17 +6,20 @@ random.seed = 42
 
 import torch
 from torch.utils.data import Dataset, DataLoader
+from torchvision.io import read_image
 from torchvision import transforms, utils
 
-from pointnetloader import ToTensor
+from src.loader.pointnetloader import ToTensor
+from src.loader.utils import read_pc
 
 
 class SiameseNetworkDataset(Dataset):
-    def __init__(self, root_dir, valid=False, folder="train", transform=None):
+    def __init__(self, root_dir, folder="train", pc_transform=None, img_transform=None):
         self.root_dir = root_dir
 
-        self.transforms = transform if not valid else None
-        self.valid = valid
+        self.pc_transforms = pc_transform
+        self.img_transforms = img_transform
+
         self.point_cloud_files = []
         self.image_sketch_files = []
 
@@ -31,9 +34,16 @@ class SiameseNetworkDataset(Dataset):
 
     def __preproc__(self, file, is_pc):
         if is_pc:
-            pass
+            verts = read_pc(file)
+            pointcloud = np.array(verts)
+            if self.pc_transforms:
+                pointcloud = self.pc_transforms(pointcloud)
+            return pointcloud
         else:
-            pass
+            image = read_image(file)
+            if self.img_transform:
+                image = self.img_transforms(image)
+            return image
 
     def __len__(self):
         return len(self.files)
