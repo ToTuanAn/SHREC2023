@@ -1,3 +1,5 @@
+from torch.utils.data import DataLoader
+
 from src.model.abstract import AbstractModel
 import torch.nn as nn
 from torchvision import transforms, utils
@@ -23,6 +25,7 @@ img_transforms = transforms.Comnpose([
 
 train_ds = SiameseNetworkDataset(root_dir, pc_transform=pc_transforms, img_transform=img_transforms)
 
+train_loader = DataLoader(dataset=train_ds, batch_size=2, shuffle=True)
 
 class SiameseNetwork(AbstractModel):
     def __init__(self, cfg):
