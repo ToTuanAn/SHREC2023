@@ -3,7 +3,9 @@ from ctypes import Union
 from typing import List, Optional
 import pytorch_lightning as pl
 from pytorch_lightning.utilities.types import EPOCH_OUTPUT, EVAL_DATALOADERS, STEP_OUTPUT, TRAIN_DATALOADERS
+from src.loader.pointnetloader import Normalize, ToTensor
 import torch
+from torchvision import transforms
 from src.utils.device import detach
 
 class AbstractModel(pl.LightningModule):
@@ -11,6 +13,19 @@ class AbstractModel(pl.LightningModule):
         super().__init__()
         self.cfg = cfg
         self.init_model()
+        
+    def setup(self, stage):
+        if stage != "predict":
+            pc_transforms = transforms.Compose([
+                Normalize(),
+                ToTensor()
+            ])
+
+            img_transforms = transforms.Compose([
+                transforms.Resize(256),
+                transforms.ToTensor(),
+                transforms.Normalize([0.485, 0.456, 0.406], [0.229, 0.224, 0.225])
+            ])
     
     @abc.abstractmethod
     def init_model(self):

@@ -9,24 +9,14 @@ from . import MODEL_REGISTRY
 from src.loader.loader import SiameseNetworkDataset
 from ..loader.pointnetloader import Normalize, ToTensor
 
-MODEL_REGISTRY.register()
+
 root_dir = '../../dataset/'
-
-pc_transforms = transforms.Compose([
-    Normalize(),
-    ToTensor()
-])
-
-img_transforms = transforms.Comnpose([
-    transforms.Resize(256),
-    transforms.ToTensor(),
-    transforms.Normalize([0.485, 0.456, 0.406], [0.229, 0.224, 0.225])
-])
 
 train_ds = SiameseNetworkDataset(root_dir, pc_transform=pc_transforms, img_transform=img_transforms)
 
 train_loader = DataLoader(dataset=train_ds, batch_size=2, shuffle=True)
 
+MODEL_REGISTRY.register()
 class SiameseNetwork(AbstractModel):
     def __init__(self, cfg):
         super().__init__(cfg)

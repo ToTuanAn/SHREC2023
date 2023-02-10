@@ -12,14 +12,14 @@ def train(config):
         gpus=-1 if torch.cuda.device_count() else None,  # Use all gpus available
         check_val_every_n_epoch=config.trainer.evaluate_interval,
         log_every_n_steps=config.trainer.log_interval,
-        # enable_checkpointing=True,
+        enable_checkpointing=True,
         accelerator="ddp" if torch.cuda.device_count() > 1 else None,
         sync_batchnorm=True if torch.cuda.device_count() > 1 else False,
         precision=16 if config.trainer.use_fp16 else 32,
-        # fast_dev_run=config["global"]["debug"],
+        fast_dev_run=config.trainer.debug,
         # logger=Wlogger,
         # callbacks=callbacks,
-        # num_sanity_val_steps=-1,  # Sanity full validation required for visualization callbacks
+        num_sanity_val_steps=-1,  # Sanity full validation required for visualization callbacks
         deterministic=True,
         auto_lr_find=True,
     )
