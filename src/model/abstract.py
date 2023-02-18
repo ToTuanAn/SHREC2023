@@ -3,10 +3,14 @@ from ctypes import Union
 from typing import List, Optional
 import pytorch_lightning as pl
 from pytorch_lightning.utilities.types import EPOCH_OUTPUT, EVAL_DATALOADERS, STEP_OUTPUT, TRAIN_DATALOADERS
+from torch.utils.data import DataLoader
+
 from src.loader.pointnetloader import Normalize, ToTensor
 import torch
 from torchvision import transforms
 from src.utils.device import detach
+
+from src.loader.loader import SiameseNetworkDataset
 
 class AbstractModel(pl.LightningModule):
     def __init__(self, cfg):
@@ -26,6 +30,14 @@ class AbstractModel(pl.LightningModule):
                 transforms.ToTensor(),
                 transforms.Normalize([0.485, 0.456, 0.406], [0.229, 0.224, 0.225])
             ])
+
+            self.train_dataset = SiameseNetworkDataset(root_dir='../../dataset',
+                                                       pc_transforms=pc_transforms,
+                                                       img_transforms=img_transforms)
+
+            self.val_dataset = SiameseNetworkDataset(root_dir='../../dataset',
+                                                       pc_transforms=pc_transforms,
+                                                       img_transforms=img_transforms)
     
     @abc.abstractmethod
     def init_model(self):
@@ -80,21 +92,16 @@ class AbstractModel(pl.LightningModule):
         pass
     
     def train_dataloader(self) -> TRAIN_DATALOADERS:
-        """
-        Implement PyTorch DataLoaders for training.
-        Returns:
-            TRAIN_DATALOADERS: train dataloader
-        """
-        # TODO: add train dataloader
-        pass
+        train_loader = DataLoader(dataset=self.train_dataset,
+                                       batch_size=4,
+                                       shuffle=True)
+        return train_loader
     
     def val_dataloader(self) -> EVAL_DATALOADERS:
-        """
-        Implement PyTorch DataLoaders for evaluation.
-        Returns:
-            EVAL_DATALOADERS: evaluation dataloader
-        """
-        pass
+        val_loader = DataLoader(dataset=self.val_dataset,
+                                       batch_size=4,
+                                       shuffle=True)
+        return val_loader
     
     def configure_optimizers(self):
         optimizer = torch.optim.AdamW(self.parameters(), self.cfg.trainer["lr"])
