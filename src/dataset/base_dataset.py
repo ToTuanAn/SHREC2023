@@ -1,6 +1,7 @@
 import os
 import numpy as np
 import random
+import torch
 
 random.seed = 42
 
@@ -55,3 +56,11 @@ class SiameseNetworkDataset(Dataset):
             sketch_image = self._preprocess_image(f)
 
         return {"point_cloud": point_cloud, "sketch_image": sketch_image}
+
+    def collate_fn(self, batch):
+        batch_as_dict = {
+            "point_clouds": torch.stack([x["point_cloud"] for x in batch]),
+            "sketch_images": torch.stack([x["sketch_image"] for x in batch]),
+        }
+
+        return batch_as_dict

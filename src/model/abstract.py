@@ -11,7 +11,7 @@ from pytorch_lightning.utilities.types import (
 from torch.utils.data import DataLoader
 import torch
 from torchvision import transforms
-from dataset.baseline import SiameseNetworkDataset
+from dataset.base_dataset import SiameseNetworkDataset
 from src.dataset.pointnetloader import Normalize, ToTensor
 from src.utils.device import detach
 
@@ -102,12 +102,20 @@ class AbstractModel(pl.LightningModule):
 
     def train_dataloader(self) -> TRAIN_DATALOADERS:
         train_loader = DataLoader(
-            dataset=self.train_dataset, batch_size=4, shuffle=True
+            dataset=self.train_dataset,
+            batch_size=4,
+            shuffle=True,
+            collate_fn=self.train_dataset.collate_fn,
         )
         return train_loader
 
     def val_dataloader(self) -> EVAL_DATALOADERS:
-        val_loader = DataLoader(dataset=self.val_dataset, batch_size=4, shuffle=True)
+        val_loader = DataLoader(
+            dataset=self.val_dataset,
+            batch_size=4,
+            shuffle=True,
+            collate_fn=self.val_dataset.collate_fn,
+        )
         return val_loader
 
     def configure_optimizers(self):
