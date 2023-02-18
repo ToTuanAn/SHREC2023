@@ -2,54 +2,61 @@ import abc
 from ctypes import Union
 from typing import List, Optional
 import pytorch_lightning as pl
-from pytorch_lightning.utilities.types import EPOCH_OUTPUT, EVAL_DATALOADERS, STEP_OUTPUT, TRAIN_DATALOADERS
+from pytorch_lightning.utilities.types import (
+    EPOCH_OUTPUT,
+    EVAL_DATALOADERS,
+    STEP_OUTPUT,
+    TRAIN_DATALOADERS,
+)
 from torch.utils.data import DataLoader
-
-from src.loader.pointnetloader import Normalize, ToTensor
 import torch
 from torchvision import transforms
+from dataset.baseline import SiameseNetworkDataset
+from src.dataset.pointnetloader import Normalize, ToTensor
 from src.utils.device import detach
 
-from src.loader.loader import SiameseNetworkDataset
 
 class AbstractModel(pl.LightningModule):
     def __init__(self, cfg):
         super().__init__()
         self.cfg = cfg
         self.init_model()
-        
+
     def setup(self, stage):
         if stage != "predict":
-            pc_transforms = transforms.Compose([
-                Normalize(),
-                ToTensor()
-            ])
+            pc_transforms = transforms.Compose([Normalize()(), ToTensor()])
 
-            img_transforms = transforms.Compose([
-                transforms.Resize(256),
-                transforms.ToTensor(),
-                transforms.Normalize([0.485, 0.456, 0.406], [0.229, 0.224, 0.225])
-            ])
+            img_transforms = transforms.Compose(
+                [
+                    transforms.Resize(256),
+                    transforms.ToTensor(),
+                    transforms.Normalize([0.485, 0.456, 0.406], [0.229, 0.224, 0.225]),
+                ]
+            )
 
-            self.train_dataset = SiameseNetworkDataset(root_dir='../../dataset',
-                                                       pc_transforms=pc_transforms,
-                                                       img_transforms=img_transforms)
+            self.train_dataset = SiameseNetworkDataset(
+                root_dir=self.cfg["dataset"],
+                pc_transforms=pc_transforms,
+                img_transforms=img_transforms,
+            )
 
-            self.val_dataset = SiameseNetworkDataset(root_dir='../../dataset',
-                                                       pc_transforms=pc_transforms,
-                                                       img_transforms=img_transforms)
-    
+            self.val_dataset = SiameseNetworkDataset(
+                root_dir=self.cfg["dataset"],
+                pc_transforms=pc_transforms,
+                img_transforms=img_transforms,
+            )
+
     @abc.abstractmethod
     def init_model(self):
         """
         Function to initialize model
         """
         pass
-    
+
     @abc.abstractmethod
     def forward(self, batch):
         raise NotImplementedError
-    
+
     @abc.abstractmethod
     def compute_loss(self, batch, **kwargs):
         """
@@ -61,14 +68,14 @@ class AbstractModel(pl.LightningModule):
             NotImplementedError: _description_
         """
         raise NotImplementedError
-    
+
     def training_step(self, batch, batch_idx):
         # 1. get embeddings from model
         output = self.forward(batch)
         # 2. Calculate loss
         loss = self.compute_loss(**output, batch=batch)
         # 3. TODO: Update monitor
-        
+
         return {"loss": detach(loss)}
 
     def validation_step(self, batch, batch_idx):
@@ -79,8 +86,10 @@ class AbstractModel(pl.LightningModule):
         # 3. TODO: Update metric for each batch
 
         return {"loss": detach(loss)}
-    
-    def validation_epoch_end(self, outputs: Union[EPOCH_OUTPUT, List[EPOCH_OUTPUT]]) -> None:
+
+    def validation_epoch_end(
+        self, outputs: Union[EPOCH_OUTPUT, List[EPOCH_OUTPUT]]
+    ) -> None:
         """
         Callback at validation epoch end to do additional works
         with output of validation step, note that this is called
@@ -90,26 +99,23 @@ class AbstractModel(pl.LightningModule):
         """
         # TODO: add metric evaluation and reset
         pass
-    
+
     def train_dataloader(self) -> TRAIN_DATALOADERS:
-        train_loader = DataLoader(dataset=self.train_dataset,
-                                       batch_size=4,
-                                       shuffle=True)
+        train_loader = DataLoader(
+            dataset=self.train_dataset, batch_size=4, shuffle=True
+        )
         return train_loader
-    
+
     def val_dataloader(self) -> EVAL_DATALOADERS:
-        val_loader = DataLoader(dataset=self.val_dataset,
-                                       batch_size=4,
-                                       shuffle=True)
+        val_loader = DataLoader(dataset=self.val_dataset, batch_size=4, shuffle=True)
         return val_loader
-    
+
     def configure_optimizers(self):
         optimizer = torch.optim.AdamW(self.parameters(), self.cfg.trainer["lr"])
 
         scheduler = torch.optim.lr_scheduler.MultiStepLR(
-          optimizer, 
-          milestones=[120, 250, 300], 
-        gamma=0.5)
+            optimizer, milestones=[120, 250, 300], gamma=0.5
+        )
 
         return {
             "optimizer": optimizer,
