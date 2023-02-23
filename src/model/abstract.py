@@ -1,18 +1,17 @@
 import abc
 from ctypes import Union
-from typing import List, Optional
+from typing import List
 import pytorch_lightning as pl
 from pytorch_lightning.utilities.types import (
     EPOCH_OUTPUT,
     EVAL_DATALOADERS,
-    STEP_OUTPUT,
     TRAIN_DATALOADERS,
 )
 from torch.utils.data import DataLoader
 import torch
 from torchvision import transforms
-from dataset.base_dataset import SiameseNetworkDataset
-from src.dataset.pointnetloader import Normalize, ToTensor
+from src.dataset.base_dataset import SiameseNetworkDataset
+from src.transformer.pc_transformer import Normalize, ToTensor
 from src.utils.device import detach
 
 

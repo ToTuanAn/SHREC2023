@@ -1,6 +1,6 @@
 from src.model.abstract import AbstractModel
 from src.extractor.img_extractor import EfficientNetExtractor
-from sec.extractor.pc_extractor import PointNet
+from src.extractor.base_pc_extractor import PointNet
 from . import MODEL_REGISTRY
 
 
