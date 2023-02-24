@@ -1,5 +1,6 @@
 import hydra
 import torch
+from torch import nn
 from torch.utils.data import DataLoader
 from torchvision.transforms import transforms
 from tqdm import tqdm
@@ -23,27 +24,45 @@ EPOCHS = 100
 #@hydra.main(version_base=None, config_path="../configs", config_name="config")
 def main():
     train_set = TextPointCloudDataset(root_dir='/home/totuanan/Workplace/SHREC2023/SHREC2023/dataset', pc_transform=train_transforms)
-    train_loader = DataLoader(dataset=train_set, batch_size=2, shuffle=False)
+    train_loader = DataLoader(dataset=train_set, batch_size=4, shuffle=True)
 
     model = TextPointCloudNetwork(num_classes=128)
+    triplet_loss = nn.TripletMarginLoss(margin=1.0, p=2)
     optimizer = torch.optim.Adam(model.parameters(), lr=0.00025)
-
 
     for epoch in tqdm(range(EPOCHS)):
         running_loss = 0.0
         for i, data in enumerate(train_loader):
-            point_cloud, input_ids, attention_mask = data['point_cloud'].float().transpose(1,2), data['input_ids'].squeeze(0), data['attention_mask'].squeeze(0)
-            point_cloud_embedding, text_queries_embedding = model.forward({'point_cloud': point_cloud,
+            true_point_cloud, false_point_cloud, input_ids, attention_mask = data['true_point_cloud'].float().transpose(1,2), \
+                                                                             data['false_point_cloud'].float().transpose(1,2),\
+                                                                             data['input_ids'], data['attention_mask']
+
+            true_point_cloud_embedding, false_point_cloud_embedding, text_queries_embedding = model.forward({'true_point_cloud': true_point_cloud,
+                                                                           'false_point_cloud': false_point_cloud,
                                                                           'text_queries': {
                                                                             'input_ids': input_ids,
                                                                             'attention_mask': attention_mask
                                                                           }
                                                                          })
-            print(point_cloud_embedding.shape, text_queries_embedding.shape)
-            break
-        break
+
+            loss = triplet_loss(text_queries_embedding, true_point_cloud_embedding, false_point_cloud_embedding)
+            loss.backward()
+            optimizer.step()
+
+            # print("True point cloud embedding: ", true_point_cloud_embedding)
+            # print("False point cloud embedding: ", false_point_cloud_embedding)
+            # print("Text queries embedding: ", text_queries_embedding)
+
+            running_loss += loss.item()
+            if i % 5 == 4:  # print every 10 mini-batches
+                print('[Epoch: %d, Batch: %4d / %4d], loss: %.3f' %
+                      (epoch + 1, i + 1, len(train_loader), running_loss / 10))
+                running_loss = 0.0
+
+        # save the model
+        torch.save(model.state_dict(), f"/home/totuanan/Workplace/SHREC2023/SHREC2023/weights/save_{epoch}.pth")
+
 
 
 if __name__ == '__main__':
     main()
-

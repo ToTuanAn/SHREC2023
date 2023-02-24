@@ -28,11 +28,12 @@ class TextPointCloudNetwork(nn.Module):
         return output
 
     def forward(self, batch):
-        point_cloud, text_queries = batch['point_cloud'], batch['text_queries']
-        pointnet_embedding_feature = self.forward_pointnet(point_cloud)
+        true_point_cloud, false_point_cloud, text_queries = batch['true_point_cloud'], batch['false_point_cloud'], batch['text_queries']
+        true_pointnet_embedding_feature = self.forward_pointnet(true_point_cloud)
+        false_pointnet_embedding_feature = self.forward_pointnet(false_point_cloud)
         text_queries_embedding_feature = self.forward_lang_extractor(text_queries)
-        print("OK")
-        return pointnet_embedding_feature, text_queries_embedding_feature
+
+        return true_pointnet_embedding_feature, false_pointnet_embedding_feature, text_queries_embedding_feature
 
     def compute_loss(self, batch, **kwargs):
         # TODO: write method to compute loss

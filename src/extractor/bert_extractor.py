@@ -41,8 +41,7 @@ class LangExtractor(ExtractorNetwork):
         self.feature_dim = self.extractor.config.hidden_size
 
     def forward(self, batch):
-        input_ids, attention_mask = batch["input_ids"].squeeze(0), batch["attention_mask"].squeeze(0)
-        print(input_ids, attention_mask)
+        input_ids, attention_mask = batch["input_ids"], batch["attention_mask"]
         transformer_out = self.extractor(
             input_ids=input_ids, attention_mask=attention_mask
         )
@@ -50,10 +49,10 @@ class LangExtractor(ExtractorNetwork):
         feature = transformer_out.last_hidden_state
         feature = torch.mean(feature, dim=1)
 
-        print(self.feature_dim)
+        # print(self.feature_dim)
 
         return feature
 
 
-if __name__ == '__main__':
+if __name__ == '_main_':
     pass
