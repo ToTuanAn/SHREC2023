@@ -2,11 +2,13 @@ import os
 import random
 
 import numpy as np
+import pandas as pd
 
 from src.transformer.pc_transformer import PointSampler, Normalize
 import pymeshlab
 import numpy as np
 import random
+
 
 random.seed = 42
 
@@ -52,7 +54,12 @@ def preprocessing_img(img_path='./dataset/IMG_Sketch/'):
     pass
 
 
+def create_validation_set(path='/home/totuanan/Workplace/SHREC2023/SHREC2023/dataset/text_queries'):
+    df = pd.read_csv(os.path.join(path, 'TextQuery_GT_Train.csv'))
+    df = df.sample(frac=1).head(48)
+    df.to_csv(os.path.join(path, 'TextQuery_GT_Validation.csv'), index=False)
+
+
 if __name__ == "__main__":
-    pc = load_point_cloud('/home/totuanan/Workplace/SHREC2023/SHREC2023/dataset/PC_OBJ/0a77cd2a91dfff53.obj')
-    print(pc)
+    create_validation_set()
 

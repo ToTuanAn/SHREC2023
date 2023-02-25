@@ -17,21 +17,25 @@ from transformers import BertTokenizer
 
 
 class TextPointCloudDataset(Dataset):
-    def __init__(self, root_dir, pc_transform=None):
+    def __init__(self, root_dir, pc_transform=None, type='train'):
         self.root_dir = root_dir
+        self.type = type
 
         self.text_tokenizer = BertTokenizer.from_pretrained('bert-base-uncased',
                                                             do_lower_case=True)
         self.pc_transforms = pc_transform
 
         text_queries_folder_path = os.path.join(root_dir, "text_queries")
+
         ground_truth_path = os.path.join(text_queries_folder_path, "TextQuery_GT_Train.csv")
+        validation_ground_truth_path = os.path.join(text_queries_folder_path, "TextQuery_GT_Validation.csv")
         text_queries_path = os.path.join(text_queries_folder_path, "TextQuery_Train.csv")
         model_id_path = os.path.join(text_queries_folder_path, "ModelID.csv")
 
         self.point_cloud_path = os.path.join(root_dir, "PC_OBJ")
 
         self.ground_truth_csv = pd.read_csv(ground_truth_path, sep=";")
+        self.validation_ground_truth_csv = pd.read_csv(validation_ground_truth_path, sep=";")
         self.text_queries_csv = pd.read_csv(text_queries_path, sep=";")
 
         self.point_cloud_ids_list = pd.read_csv(model_id_path)['ID'].to_list()
@@ -40,14 +44,17 @@ class TextPointCloudDataset(Dataset):
         self.text_queries_list = self.ground_truth_csv['Text Query ID'].to_list()
         self.point_cloud_list = self.ground_truth_csv['Model ID'].to_list()
 
+        self.validation_text_queries_list = self.validation_ground_truth_csv['Text Query ID'].to_list()
+        self.validation_point_cloud_list = self.validation_ground_truth_csv['Model ID'].to_list()
+
         self.queries_model_mapping = dict()
         for i, text in enumerate(self.text_queries_list):
             if text not in self.queries_model_mapping:
-                self.queries_model_mapping[text]= set()
+                self.queries_model_mapping[text] = set()
             self.queries_model_mapping[text].add(self.point_cloud_list[i])
 
-        print(self.queries_model_mapping)
-        print(self.text_queries_mapping)
+        print(self.validation_text_queries_list)
+        print(self.validation_point_cloud_list)
 
 
 
@@ -72,11 +79,18 @@ class TextPointCloudDataset(Dataset):
         return input_ids, attention_mask
 
     def __len__(self):
-        return len(self.text_queries_list)
+        if self.type == 'train':
+            return len(self.text_queries_list)
+        else:
+            return len(self.validation_text_queries_list)
 
     def __getitem__(self, idx):
-        text_queries_id = self.text_queries_list[idx]
-        true_point_cloud_id = false_point_cloud_id = self.point_cloud_list[idx]
+        if self.type == 'train':
+            text_queries_id = self.text_queries_list[idx]
+            true_point_cloud_id = false_point_cloud_id = self.point_cloud_list[idx]
+        else:
+            text_queries_id = self.validation_text_queries_list[idx]
+            true_point_cloud_id = false_point_cloud_id = self.validation_point_cloud_list[idx]
 
         while false_point_cloud_id in self.queries_model_mapping[text_queries_id]:
             false_point_cloud_id = self.point_cloud_ids_list[random.randint(0, len(self.point_cloud_ids_list)-1)]
