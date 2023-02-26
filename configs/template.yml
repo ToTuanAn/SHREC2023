@@ -1,0 +1,41 @@
+global:
+  username: hcmus-shrec23
+  project_name: shrec
+  name: "template"
+  save_dir: "./runs"
+  verbose: true
+  pretrained: null
+  resume: null
+  SEED: 1337
+dataset:
+  train:
+    params:
+      root_dir: "./dataset"
+      type: "train"
+  val:
+    params:
+      root_dir: "./dataset"
+      type: "validation"
+data-loader:
+  train:
+    params:
+      batch_size: 4
+      num_workers: 2
+      shuffle: true
+  val:
+    params:
+      batch_size: 2
+      num_workers: 2
+model:
+  name: "BaselineModel"
+  params:
+    embed_dim: 128
+trainer:
+  lr: 0.001
+  use_fp16: true
+  debug: false
+  num_epochs: 1000
+  clip_grad: 10.0
+  evaluate_interval: 1
+  print_interval: 20
+  save_interval: 1000

@@ -1,22 +1,23 @@
-import hydra
+from lightning_fabric import seed_everything
 import pytorch_lightning as pl
+from src.utils.opt import Opts
 from src.model import MODEL_REGISTRY
 import torch
 
-@hydra.main(version_base=None, config_path="../configs", config_name="config")
+
 def train(config):
-    model = MODEL_REGISTRY.get(config.model.name)(config.model)
+    model = MODEL_REGISTRY.get(config["model"]["name"])(config["model"]["params"])
     trainer = pl.Trainer(
         default_root_dir=".",
-        max_epochs=config.trainer.num_epochs,
+        max_epochs=config["trainer"]["num_epochs"],
         gpus=-1 if torch.cuda.device_count() else None,  # Use all gpus available
-        check_val_every_n_epoch=config.trainer.evaluate_interval,
-        log_every_n_steps=config.trainer.log_interval,
+        check_val_every_n_epoch=config["trainer"]["evaluate_interval"],
+        log_every_n_steps=config["trainer"]["log_interval"],
         enable_checkpointing=True,
         accelerator="ddp" if torch.cuda.device_count() > 1 else None,
         sync_batchnorm=True if torch.cuda.device_count() > 1 else False,
-        precision=16 if config.trainer.use_fp16 else 32,
-        fast_dev_run=config.trainer.debug,
+        precision=16 if config["trainer"]["use_fp16"] else 32,
+        fast_dev_run=config["trainer"]["debug"],
         # logger=Wlogger,
         # callbacks=callbacks,
         num_sanity_val_steps=-1,  # Sanity full validation required for visualization callbacks
@@ -25,6 +26,10 @@ def train(config):
     )
 
     trainer.fit(model, ckpt_path=config["global"]["resume"])
+    # trainer.fit(model)
+
 
 if __name__ == "__main__":
-    train()
+    cfg = Opts(cfg="configs/template.yml").parse_args()
+    seed_everything(seed=cfg["global"]["SEED"])
+    train(cfg)
