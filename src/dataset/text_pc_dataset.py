@@ -132,8 +132,12 @@ class TextPointCloudDataset(Dataset):
 
     def collate_fn(self, batch):
         batch_as_dict = {
-            "true_point_clouds": torch.stack([x["true_point_clouds"] for x in batch]),
-            "false_point_clouds": torch.stack([x["false_point_clouds"] for x in batch]),
+            "true_point_clouds": torch.stack([x["true_point_cloud"] for x in batch])
+            .float()
+            .transpose(1, 2),
+            "false_point_clouds": torch.stack([x["false_point_cloud"] for x in batch])
+            .float()
+            .transpose(1, 2),
             "text_queries": {
                 "input_ids": torch.stack([x["input_ids"] for x in batch]),
                 "attension_masks": torch.stack([x["attention_mask"] for x in batch]),

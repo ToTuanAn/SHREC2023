@@ -37,12 +37,12 @@ class AbstractModel(pl.LightningModule):
             validation_transforms = transforms.Compose([Normalize(), ToTensor()])
 
             self.train_dataset = TextPointCloudDataset(
-                pc_transforms=train_transforms,
+                pc_transform=train_transforms,
                 **self.cfg["dataset"]["train"]["params"],
             )
 
             self.val_dataset = TextPointCloudDataset(
-                pc_transforms=validation_transforms,
+                pc_transform=validation_transforms,
                 **self.cfg["dataset"]["val"]["params"],
             )
 
@@ -102,7 +102,7 @@ class AbstractModel(pl.LightningModule):
         train_loader = DataLoader(
             dataset=self.train_dataset,
             collate_fn=self.train_dataset.collate_fn,
-            **self.cfg["data-loader"]["train"]["params"],
+            **self.cfg["data_loader"]["train"]["params"],
         )
         return train_loader
 
@@ -110,7 +110,7 @@ class AbstractModel(pl.LightningModule):
         val_loader = DataLoader(
             dataset=self.val_dataset,
             collate_fn=self.val_dataset.collate_fn,
-            **self.cfg["data-loader"]["val"]["params"],
+            **self.cfg["data_loader"]["val"]["params"],
         )
         return val_loader
 

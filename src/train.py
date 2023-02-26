@@ -6,7 +6,7 @@ import torch
 
 
 def train(config):
-    model = MODEL_REGISTRY.get(config["model"]["name"])(config["model"]["params"])
+    model = MODEL_REGISTRY.get(config["model"]["name"])(config)
     trainer = pl.Trainer(
         default_root_dir=".",
         max_epochs=config["trainer"]["num_epochs"],
@@ -31,5 +31,5 @@ def train(config):
 
 if __name__ == "__main__":
     cfg = Opts(cfg="configs/template.yml").parse_args()
-    seed_everything(seed=cfg["global"]["SEED"])
+    # seed_everything(seed=cfg["global"]["SEED"])
     train(cfg)

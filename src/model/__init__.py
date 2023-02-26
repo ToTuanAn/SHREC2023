@@ -2,4 +2,5 @@ from src.utils.registry import Registry
 
 MODEL_REGISTRY = Registry("MODEL")
 
-from .baseline import BaselineModel
+from src.model.baseline import BaselineModel
+MODEL_REGISTRY.register(BaselineModel)

@@ -1,20 +1,18 @@
 from src.model.abstract import AbstractModel
 from src.extractor.base_pc_extractor import PointNet
 from src.extractor.bert_extractor import LangExtractor
-from . import MODEL_REGISTRY
 import torch.nn as nn
 
 
-@MODEL_REGISTRY.register()
 class BaselineModel(AbstractModel):
     def init_model(self):
         self.pointnet = PointNet()
         self.lang_extractor = LangExtractor("bert-base-uncased", True)
         self.pointnet_linear = nn.Linear(
-            self.pointnet.feature_dim, self.cfg["model"]["embed-size"]
+            self.pointnet.feature_dim, self.cfg["model"]["params"]["embed_dim"]
         )
         self.lang_extractor_linear = nn.Linear(
-            self.lang_extractor.feature_dim, self.cfg["model"]["embed-size"]
+            self.lang_extractor.feature_dim, self.cfg["model"]["params"]["embed_dim"]
         )
 
     def forward_pointnet(self, batch_pc):
