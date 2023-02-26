@@ -1,11 +1,17 @@
 from lightning_fabric import seed_everything
 import pytorch_lightning as pl
-from src.utils.opt import Opts
+from src.callback import CALLBACK_REGISTRY
 from src.model import MODEL_REGISTRY
+from src.utils.opt import Opts
 import torch
 
 
 def train(config):
+    callbacks = [
+        CALLBACK_REGISTRY.get(mcfg["name"])(**mcfg["params"])
+        for mcfg in config["callbacks"]
+    ]
+
     model = MODEL_REGISTRY.get(config["model"]["name"])(config)
     trainer = pl.Trainer(
         default_root_dir=".",
@@ -19,17 +25,16 @@ def train(config):
         precision=16 if config["trainer"]["use_fp16"] else 32,
         fast_dev_run=config["trainer"]["debug"],
         # logger=Wlogger,
-        # callbacks=callbacks,
+        callbacks=callbacks,
         num_sanity_val_steps=-1,  # Sanity full validation required for visualization callbacks
         deterministic=True,
         auto_lr_find=True,
     )
 
     trainer.fit(model, ckpt_path=config["global"]["resume"])
-    # trainer.fit(model)
 
 
 if __name__ == "__main__":
     cfg = Opts(cfg="configs/template.yml").parse_args()
-    # seed_everything(seed=cfg["global"]["SEED"])
+    seed_everything(seed=cfg["global"]["SEED"])
     train(cfg)

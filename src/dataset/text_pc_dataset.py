@@ -6,8 +6,6 @@ import pandas as pd
 
 from src.preprocessing import load_point_cloud
 
-random.seed = 42
-
 from torch.utils.data import Dataset
 
 from transformers import BertTokenizer
