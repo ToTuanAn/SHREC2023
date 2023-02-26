@@ -12,9 +12,9 @@ from transformers import BertTokenizer
 
 
 class TextPointCloudDataset(Dataset):
-    def __init__(self, root_dir, pc_transform=None, type="train"):
+    def __init__(self, root_dir, pc_transform=None, stage="train"):
         self.root_dir = root_dir
-        self.type = type
+        self.stage = stage
 
         self.text_tokenizer = BertTokenizer.from_pretrained(
             "bert-base-uncased", do_lower_case=True
@@ -85,13 +85,13 @@ class TextPointCloudDataset(Dataset):
         return input_ids, attention_mask
 
     def __len__(self):
-        if self.type == "train":
+        if self.stage == "train":
             return len(self.text_queries_list)
         else:
             return len(self.validation_text_queries_list)
 
     def __getitem__(self, idx):
-        if self.type == "train":
+        if self.stage == "train":
             text_queries_id = self.text_queries_list[idx]
             true_point_cloud_id = false_point_cloud_id = self.point_cloud_list[idx]
         else:

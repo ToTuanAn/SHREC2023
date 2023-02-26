@@ -1,9 +1,6 @@
 import abc
-from ctypes import Union
-from typing import List
 import pytorch_lightning as pl
 from pytorch_lightning.utilities.types import (
-    EPOCH_OUTPUT,
     EVAL_DATALOADERS,
     TRAIN_DATALOADERS,
 )
@@ -11,13 +8,12 @@ from torch.utils.data import DataLoader
 import torch
 from torchvision import transforms
 from src.dataset.text_pc_dataset import TextPointCloudDataset
-from src.transformer.pc_transformer import (
+from src.utils.pc_transform import (
     Normalize,
     RandRotation_z,
     RandomNoise,
     ToTensor,
 )
-from src.utils.device import detach
 
 
 class AbstractModel(pl.LightningModule):

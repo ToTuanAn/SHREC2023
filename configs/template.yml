@@ -11,11 +11,11 @@ dataset:
   train:
     params:
       root_dir: "./dataset"
-      type: "train"
+      stage: "train"
   val:
     params:
       root_dir: "./dataset"
-      type: "validation"
+      stage: "validation"
 data_loader:
   train:
     params:
