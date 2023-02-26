@@ -40,7 +40,7 @@ class BaselineModel(AbstractModel):
     def compute_loss(self, batch, **kwargs):
         triplet_loss = nn.TripletMarginLoss(margin=1.0, p=2)
         return triplet_loss(
-            anchor=batch["text_query_embedding_feats"],
-            positive=batch["true_pc_embedding_feats"],
-            negative=batch["false_pc_embedding_feats"],
+            anchor=kwargs["text_query_embedding_feats"],
+            positive=kwargs["true_pc_embedding_feats"],
+            negative=kwargs["false_pc_embedding_feats"],
         )

@@ -9,9 +9,6 @@ from src.preprocessing import load_point_cloud
 random.seed = 42
 
 from torch.utils.data import Dataset
-from torchvision.io import read_image
-
-from src.dataset.utils import read_pc
 
 from transformers import BertTokenizer
 
@@ -140,7 +137,7 @@ class TextPointCloudDataset(Dataset):
             .transpose(1, 2),
             "text_queries": {
                 "input_ids": torch.stack([x["input_ids"] for x in batch]),
-                "attension_masks": torch.stack([x["attention_mask"] for x in batch]),
+                "attention_mask": torch.stack([x["attention_mask"] for x in batch]),
             },
         }
 

@@ -76,7 +76,7 @@ class AbstractModel(pl.LightningModule):
         loss = self.compute_loss(**output, batch=batch)
         # 3. TODO: Update monitor
         self.log("training_loss", loss, on_step=True, on_epoch=True, prog_bar=True)
-        return {"loss": detach(loss)}
+        return {"loss": loss}
 
     def validation_step(self, batch, batch_idx):
         # 1. Get embeddings from model
@@ -85,7 +85,7 @@ class AbstractModel(pl.LightningModule):
         loss = self.compute_loss(**output, batch=batch)
         # 3. TODO: Update metric for each batch
         self.log("validation_loss", loss, on_step=True, on_epoch=True, prog_bar=True)
-        return {"loss": detach(loss)}
+        return {"loss": loss}
 
     def validation_epoch_end(self, outputs) -> None:
         """
