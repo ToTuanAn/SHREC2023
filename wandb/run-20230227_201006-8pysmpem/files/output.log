@@ -1,0 +1,102 @@
+/home/minhkhoi1026/miniconda3/envs/shrec2023/lib/python3.8/site-packages/pytorch_lightning/loggers/wandb.py:395: UserWarning: There is a wandb run already in progress and newly created instances of `WandbLogger` will reuse this run. If this is not desired, call `wandb.finish()` before instantiating `WandbLogger`.
+  rank_zero_warn(
+[34m[1mwandb[39m[22m: logging graph, to disable use `wandb.watch(log_graph=False)`
+/home/minhkhoi1026/miniconda3/envs/shrec2023/lib/python3.8/site-packages/pytorch_lightning/trainer/connectors/accelerator_connector.py:467: LightningDeprecationWarning: Setting `Trainer(gpus=-1)` is deprecated in v1.7 and will be removed in v2.0. Please use `Trainer(accelerator='gpu', devices=-1)` instead.
+  rank_zero_deprecation(
+Using 16bit None Automatic Mixed Precision (AMP)
+GPU available: True (cuda), used: True
+TPU available: False, using: 0 TPU cores
+IPU available: False, using: 0 IPUs
+HPU available: False, using: 0 HPUs
+You are using a CUDA device ('NVIDIA GeForce RTX 3050 Ti Laptop GPU') that has Tensor Cores. To properly utilize them, you should set `torch.set_float32_matmul_precision('medium' | 'high')` which will trade-off precision for performance. For more details, read https://pytorch.org/docs/stable/generated/torch.set_float32_matmul_precision.html#torch.set_float32_matmul_precision
+['754687fa7f45b78e', 'a0664df1315a8aba', 'e27877b96a4abea2', 'bd7c3921a5829c5f', 'fc9dc8118f99c0de', 'ac0abb4cfebf48b4', '26808910ed0da6e0', 'fc9dc8118f99c0de', 'efc25a321f0359fe', 'e670143d0274784c', 'c8b07c3741bb4fc8', '13b02a5332f0ecd5', '505ea7c5b84466e2', '0534ec3a9103aa94', '25d3c279224e9090', '8b54089fee8d99a0', 'c50d24d1270b99ae', 'b34ab1000d8e4510', '958da55b0d75abfc', '70529c539a3eaf30', '9131efff3efffe99', '51c33db36e283711', '599966e85d6857ce', 'b1d44ce73b4b431b', '728ac3507f29b8b1', 'c074190530330c13', '3351535576ef36bd', '76d991719a89b736', 'd22a84b6f9f25ebe', '04b64385ccad4949', '2f61c298e0395353', '865728e99be03f56', '5110adc459f44b27', 'ac0abb4cfebf48b4', 'd0c9a887b794513a', '8eba7fddfa15f905', '04b64385ccad4949', '29e33756715c2125', '70529c539a3eaf30', 'dc38f0769707dc64', '5c7bbf629c64b765', 'fc9dc8118f99c0de', '29e33756715c2125', '999ef191bff8625d', '728ac3507f29b8b1', '76d991719a89b736', 'c50d24d1270b99ae', 'dbd7cff8e346e379']
+['303ae000f3346db3', '83a6898b3cf63399', '5a47b8a4ad093e6c', 'fc2db06c4c42b0d2', '2accc11b14dde296', '0c27b52a88c33aae', 'fdfd2538c9269782', 'fe8ba017416507eb', 'cbef81f72fefce7a', '9946e34f45632be6', '6585855871402772', 'e406c931589df07b', '90ba6644ad322c47', '6f50fb3efc179160', '47d04be344220ba4', '7f9c5a47a8b18f00', 'cb6ef21b1c71cbbb', '6e92439ce227a932', '4c142b488845264b', 'a3f337038d154765', 'f0931310b6964a5e', '079c96c521c73ca9', 'b0334182d0c3faeb', '6bc2402ce628bbef', '60af2d4f86d5307c', 'e18ea7c595a3d53d', '1df3b0ad86562fde', 'e31ced3776eca0a7', '20b5e565c2f67b81', '13a49ab0aecbc76f', '834953da8335695b', '344e0698585e098a', 'fed99c4e5443d447', 'f72449d035d0ac79', '2846d0b05ed649cf', '01612cb400453597', 'bda1f6d4a4b5fe79', '36089dc42596904a', 'ab047afa481c3134', '2acea48879fd7fec', 'ae09892d3ad04b4b', '2268076b3b795a99', 'aa0598ae402d2833', '02bf2b708a98eb01', '2b72aa75a44e8847', '413505e6f4ddf95e', '0ae964801539411d', '18916433442bd760']
+['754687fa7f45b78e', 'a0664df1315a8aba', 'e27877b96a4abea2', 'bd7c3921a5829c5f', 'fc9dc8118f99c0de', 'ac0abb4cfebf48b4', '26808910ed0da6e0', 'fc9dc8118f99c0de', 'efc25a321f0359fe', 'e670143d0274784c', 'c8b07c3741bb4fc8', '13b02a5332f0ecd5', '505ea7c5b84466e2', '0534ec3a9103aa94', '25d3c279224e9090', '8b54089fee8d99a0', 'c50d24d1270b99ae', 'b34ab1000d8e4510', '958da55b0d75abfc', '70529c539a3eaf30', '9131efff3efffe99', '51c33db36e283711', '599966e85d6857ce', 'b1d44ce73b4b431b', '728ac3507f29b8b1', 'c074190530330c13', '3351535576ef36bd', '76d991719a89b736', 'd22a84b6f9f25ebe', '04b64385ccad4949', '2f61c298e0395353', '865728e99be03f56', '5110adc459f44b27', 'ac0abb4cfebf48b4', 'd0c9a887b794513a', '8eba7fddfa15f905', '04b64385ccad4949', '29e33756715c2125', '70529c539a3eaf30', 'dc38f0769707dc64', '5c7bbf629c64b765', 'fc9dc8118f99c0de', '29e33756715c2125', '999ef191bff8625d', '728ac3507f29b8b1', '76d991719a89b736', 'c50d24d1270b99ae', 'dbd7cff8e346e379']
+['303ae000f3346db3', '83a6898b3cf63399', '5a47b8a4ad093e6c', 'fc2db06c4c42b0d2', '2accc11b14dde296', '0c27b52a88c33aae', 'fdfd2538c9269782', 'fe8ba017416507eb', 'cbef81f72fefce7a', '9946e34f45632be6', '6585855871402772', 'e406c931589df07b', '90ba6644ad322c47', '6f50fb3efc179160', '47d04be344220ba4', '7f9c5a47a8b18f00', 'cb6ef21b1c71cbbb', '6e92439ce227a932', '4c142b488845264b', 'a3f337038d154765', 'f0931310b6964a5e', '079c96c521c73ca9', 'b0334182d0c3faeb', '6bc2402ce628bbef', '60af2d4f86d5307c', 'e18ea7c595a3d53d', '1df3b0ad86562fde', 'e31ced3776eca0a7', '20b5e565c2f67b81', '13a49ab0aecbc76f', '834953da8335695b', '344e0698585e098a', 'fed99c4e5443d447', 'f72449d035d0ac79', '2846d0b05ed649cf', '01612cb400453597', 'bda1f6d4a4b5fe79', '36089dc42596904a', 'ab047afa481c3134', '2acea48879fd7fec', 'ae09892d3ad04b4b', '2268076b3b795a99', 'aa0598ae402d2833', '02bf2b708a98eb01', '2b72aa75a44e8847', '413505e6f4ddf95e', '0ae964801539411d', '18916433442bd760']
+Sanity Checking: 0it [00:00, ?it/s]
+LOCAL_RANK: 0 - CUDA_VISIBLE_DEVICES: [0]
+  | Name           | Type          | Params
+-------------------------------------------------
+0 | pointnet       | PointNet      | 3.5 M
+1 | lang_extractor | LangExtractor | 109 M
+2 | pc_linear      | Linear        | 32.9 K
+3 | lang_linear    | Linear        | 98.4 K
+-------------------------------------------------
+3.7 M     Trainable params
+109 M     Non-trainable params
+113 M     Total params
+226.281   Total estimated model params size (MB)
+/home/minhkhoi1026/miniconda3/envs/shrec2023/lib/python3.8/site-packages/pytorch_lightning/trainer/connectors/data_connector.py:224: PossibleUserWarning: The dataloader, val_dataloader 0, does not have many workers which may be a bottleneck. Consider increasing the value of the `num_workers` argument` (try 12 which is the number of cpus on this machine) in the `DataLoader` init to improve performance.
+  rank_zero_warn(
+Traceback (most recent call last):
+  File "/home/minhkhoi1026/miniconda3/envs/shrec2023/lib/python3.8/runpy.py", line 194, in _run_module_as_main
+    return _run_code(code, main_globals, None,
+  File "/home/minhkhoi1026/miniconda3/envs/shrec2023/lib/python3.8/runpy.py", line 87, in _run_code
+    exec(code, run_globals)
+  File "/home/minhkhoi1026/.vscode-server/extensions/ms-python.python-2023.2.0/pythonFiles/lib/python/debugpy/adapter/../../debugpy/launcher/../../debugpy/__main__.py", line 39, in <module>
+    cli.main()
+  File "/home/minhkhoi1026/.vscode-server/extensions/ms-python.python-2023.2.0/pythonFiles/lib/python/debugpy/adapter/../../debugpy/launcher/../../debugpy/../debugpy/server/cli.py", line 430, in main
+    run()
+  File "/home/minhkhoi1026/.vscode-server/extensions/ms-python.python-2023.2.0/pythonFiles/lib/python/debugpy/adapter/../../debugpy/launcher/../../debugpy/../debugpy/server/cli.py", line 284, in run_file
+    runpy.run_path(target, run_name="__main__")
+  File "/home/minhkhoi1026/.vscode-server/extensions/ms-python.python-2023.2.0/pythonFiles/lib/python/debugpy/_vendored/pydevd/_pydevd_bundle/pydevd_runpy.py", line 321, in run_path
+    return _run_module_code(code, init_globals, run_name,
+  File "/home/minhkhoi1026/.vscode-server/extensions/ms-python.python-2023.2.0/pythonFiles/lib/python/debugpy/_vendored/pydevd/_pydevd_bundle/pydevd_runpy.py", line 135, in _run_module_code
+    _run_code(code, mod_globals, init_globals,
+  File "/home/minhkhoi1026/.vscode-server/extensions/ms-python.python-2023.2.0/pythonFiles/lib/python/debugpy/_vendored/pydevd/_pydevd_bundle/pydevd_runpy.py", line 124, in _run_code
+    exec(code, run_globals)
+  File "/home/minhkhoi1026/workspace/SHREC2023/src/train.py", line 47, in <module>
+    train(cfg)
+  File "/home/minhkhoi1026/workspace/SHREC2023/src/train.py", line 41, in train
+    trainer.fit(model, ckpt_path=config["global"]["resume"])
+  File "/home/minhkhoi1026/miniconda3/envs/shrec2023/lib/python3.8/site-packages/pytorch_lightning/trainer/trainer.py", line 608, in fit
+    call._call_and_handle_interrupt(
+  File "/home/minhkhoi1026/miniconda3/envs/shrec2023/lib/python3.8/site-packages/pytorch_lightning/trainer/call.py", line 38, in _call_and_handle_interrupt
+    return trainer_fn(*args, **kwargs)
+  File "/home/minhkhoi1026/miniconda3/envs/shrec2023/lib/python3.8/site-packages/pytorch_lightning/trainer/trainer.py", line 650, in _fit_impl
+    self._run(model, ckpt_path=self.ckpt_path)
+  File "/home/minhkhoi1026/miniconda3/envs/shrec2023/lib/python3.8/site-packages/pytorch_lightning/trainer/trainer.py", line 1103, in _run
+    results = self._run_stage()
+  File "/home/minhkhoi1026/miniconda3/envs/shrec2023/lib/python3.8/site-packages/pytorch_lightning/trainer/trainer.py", line 1182, in _run_stage
+    self._run_train()
+  File "/home/minhkhoi1026/miniconda3/envs/shrec2023/lib/python3.8/site-packages/pytorch_lightning/trainer/trainer.py", line 1195, in _run_train
+    self._run_sanity_check()
+  File "/home/minhkhoi1026/miniconda3/envs/shrec2023/lib/python3.8/site-packages/pytorch_lightning/trainer/trainer.py", line 1267, in _run_sanity_check
+    val_loop.run()
+  File "/home/minhkhoi1026/miniconda3/envs/shrec2023/lib/python3.8/site-packages/pytorch_lightning/loops/loop.py", line 199, in run
+    self.advance(*args, **kwargs)
+  File "/home/minhkhoi1026/miniconda3/envs/shrec2023/lib/python3.8/site-packages/pytorch_lightning/loops/dataloader/evaluation_loop.py", line 152, in advance
+    dl_outputs = self.epoch_loop.run(self._data_fetcher, dl_max_batches, kwargs)
+  File "/home/minhkhoi1026/miniconda3/envs/shrec2023/lib/python3.8/site-packages/pytorch_lightning/loops/loop.py", line 199, in run
+    self.advance(*args, **kwargs)
+  File "/home/minhkhoi1026/miniconda3/envs/shrec2023/lib/python3.8/site-packages/pytorch_lightning/loops/epoch/evaluation_epoch_loop.py", line 121, in advance
+    batch = next(data_fetcher)
+  File "/home/minhkhoi1026/miniconda3/envs/shrec2023/lib/python3.8/site-packages/pytorch_lightning/utilities/fetching.py", line 184, in __next__
+    return self.fetching_function()
+  File "/home/minhkhoi1026/miniconda3/envs/shrec2023/lib/python3.8/site-packages/pytorch_lightning/utilities/fetching.py", line 265, in fetching_function
+    self._fetch_next_batch(self.dataloader_iter)
+  File "/home/minhkhoi1026/miniconda3/envs/shrec2023/lib/python3.8/site-packages/pytorch_lightning/utilities/fetching.py", line 280, in _fetch_next_batch
+    batch = next(iterator)
+  File "/home/minhkhoi1026/miniconda3/envs/shrec2023/lib/python3.8/site-packages/torch/utils/data/dataloader.py", line 628, in __next__
+    data = self._next_data()
+  File "/home/minhkhoi1026/miniconda3/envs/shrec2023/lib/python3.8/site-packages/torch/utils/data/dataloader.py", line 1333, in _next_data
+    return self._process_data(data)
+  File "/home/minhkhoi1026/miniconda3/envs/shrec2023/lib/python3.8/site-packages/torch/utils/data/dataloader.py", line 1359, in _process_data
+    data.reraise()
+  File "/home/minhkhoi1026/miniconda3/envs/shrec2023/lib/python3.8/site-packages/torch/_utils.py", line 543, in reraise
+    raise exception
+TypeError: Caught TypeError in DataLoader worker process 0.
+Original Traceback (most recent call last):
+  File "/home/minhkhoi1026/miniconda3/envs/shrec2023/lib/python3.8/site-packages/torch/utils/data/_utils/worker.py", line 302, in _worker_loop
+    data = fetcher.fetch(index)
+  File "/home/minhkhoi1026/miniconda3/envs/shrec2023/lib/python3.8/site-packages/torch/utils/data/_utils/fetch.py", line 58, in fetch
+    data = [self.dataset[idx] for idx in possibly_batched_index]
+  File "/home/minhkhoi1026/miniconda3/envs/shrec2023/lib/python3.8/site-packages/torch/utils/data/_utils/fetch.py", line 58, in <listcomp>
+    data = [self.dataset[idx] for idx in possibly_batched_index]
+  File "/home/minhkhoi1026/workspace/SHREC2023/src/dataset/text_pc_dataset.py", line 118, in __getitem__
+    true_point_cloud = self._preprocess_pc(true_pc_path)
+  File "/home/minhkhoi1026/workspace/SHREC2023/src/dataset/text_pc_dataset.py", line 68, in _preprocess_pc
+    pointcloud = load_point_cloud(filename)
+  File "/home/minhkhoi1026/workspace/SHREC2023/src/utils/loading.py", line 20, in load_point_cloud
+    pc_list = np.array(random().choices(pc_list, k=n_sample))
+TypeError: 'module' object is not callable

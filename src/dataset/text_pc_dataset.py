@@ -4,7 +4,7 @@ import random
 import torch
 import pandas as pd
 
-from src.preprocessing import load_point_cloud
+from src.utils.loading import load_point_cloud
 
 from torch.utils.data import Dataset
 

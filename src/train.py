@@ -1,18 +1,25 @@
 from lightning_fabric import seed_everything
 import pytorch_lightning as pl
+from pytorch_lightning.loggers.wandb import WandbLogger
+import wandb
+import torch
 from src.callback import CALLBACK_REGISTRY
 from src.model import MODEL_REGISTRY
 from src.utils.opt import Opts
-import torch
 
 
 def train(config):
+    model = MODEL_REGISTRY.get(config["model"]["name"])(config)
+
+    wandb.init(project=config["global"]["project_name"], config=config)
+    wandb_logger = WandbLogger(project=config["global"]["project_name"])
+    wandb_logger.watch((model))
+
     callbacks = [
         CALLBACK_REGISTRY.get(mcfg["name"])(**mcfg["params"])
         for mcfg in config["callbacks"]
     ]
 
-    model = MODEL_REGISTRY.get(config["model"]["name"])(config)
     trainer = pl.Trainer(
         default_root_dir=".",
         max_epochs=config["trainer"]["num_epochs"],
@@ -24,7 +31,7 @@ def train(config):
         sync_batchnorm=True if torch.cuda.device_count() > 1 else False,
         precision=16 if config["trainer"]["use_fp16"] else 32,
         fast_dev_run=config["trainer"]["debug"],
-        # logger=Wlogger,
+        logger=wandb_logger,
         callbacks=callbacks,
         num_sanity_val_steps=-1,  # Sanity full validation required for visualization callbacks
         deterministic=True,

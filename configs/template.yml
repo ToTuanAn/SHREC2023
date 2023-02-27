@@ -1,6 +1,6 @@
 global:
-  username: hcmus-shrec23
-  project_name: shrec
+  username: hcmus
+  project_name: hcmus-shrec23-textANIMAR
   name: "template"
   save_dir: "./runs"
   verbose: true

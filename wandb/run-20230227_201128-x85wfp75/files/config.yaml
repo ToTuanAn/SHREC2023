@@ -1,0 +1,97 @@
+wandb_version: 1
+
+_wandb:
+  desc: null
+  value:
+    cli_version: 0.13.10
+    framework: huggingface
+    huggingface_version: 4.26.1
+    is_jupyter_run: false
+    is_kaggle_kernel: false
+    python_version: 3.8.16
+    start_time: 1677503488.491121
+    t:
+      1:
+      - 1
+      - 9
+      - 11
+      - 41
+      - 49
+      - 55
+      2:
+      - 1
+      - 9
+      - 11
+      - 41
+      - 49
+      - 55
+      3:
+      - 1
+      - 16
+      - 23
+      4: 3.8.16
+      5: 0.13.10
+      6: 4.26.1
+      8:
+      - 5
+callbacks:
+  desc: null
+  value:
+  - name: ModelCheckpoint
+    params:
+      filename: baseline-{epoch}-{train_loss:.4f}-{val_loss:.4f}
+      mode: min
+      monitor: val_loss
+      save_top_k: -1
+      verbose: true
+data_loader:
+  desc: null
+  value:
+    train:
+      params:
+        batch_size: 4
+        num_workers: 2
+        shuffle: true
+    val:
+      params:
+        batch_size: 2
+        num_workers: 2
+dataset:
+  desc: null
+  value:
+    train:
+      params:
+        root_dir: ./dataset
+        stage: train
+    val:
+      params:
+        root_dir: ./dataset
+        stage: validation
+global:
+  desc: null
+  value:
+    SEED: 1337
+    name: template
+    pretrained: null
+    project_name: hcmus-shrec23-textANIMAR
+    resume: null
+    save_dir: ./runs
+    username: hcmus
+    verbose: true
+model:
+  desc: null
+  value:
+    name: BaselineModel
+    params:
+      embed_dim: 128
+trainer:
+  desc: null
+  value:
+    clip_grad: 10.0
+    debug: false
+    evaluate_interval: 1
+    log_interval: 1
+    lr: 0.001
+    num_epochs: 10000
+    save_interval: 1000
+    use_fp16: true
