@@ -12,7 +12,7 @@ def train(config):
     model = MODEL_REGISTRY.get(config["model"]["name"])(config)
 
     wandb.init(project=config["global"]["project_name"], config=config)
-    wandb_logger = WandbLogger(project=config["global"]["project_name"])
+    wandb_logger = WandbLogger(project=config["global"]["project_name"], save_dir=config["global"]["savedir"])
     wandb_logger.watch((model))
 
     callbacks = [

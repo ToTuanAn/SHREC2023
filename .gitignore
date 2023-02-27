@@ -9,6 +9,7 @@ tmp/
 build/
 outputs/
 lightning_logs/
+runs/
 *.pyc
 # weights
 *.pt
