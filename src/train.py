@@ -11,8 +11,8 @@ from src.utils.opt import Opts
 def train(config):
     model = MODEL_REGISTRY.get(config["model"]["name"])(config)
 
-    wandb.init(project=config["global"]["project_name"], config=config)
-    wandb_logger = WandbLogger(project=config["global"]["project_name"], save_dir=config["global"]["savedir"])
+    wandb.init(project=config["global"]["project_name"], config=config, entity='hcmus-polars')
+    wandb_logger = WandbLogger(project=config["global"]["project_name"], save_dir=config["global"]["save_dir"])
     wandb_logger.watch((model))
 
     callbacks = [
