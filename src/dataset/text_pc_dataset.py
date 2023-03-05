@@ -61,9 +61,6 @@ class TextPointCloudDataset(Dataset):
                 self.queries_model_mapping[text] = set()
             self.queries_model_mapping[text].add(self.point_cloud_list[i])
 
-        print(self.validation_text_queries_list)
-        print(self.validation_point_cloud_list)
-
     def _preprocess_pc(self, filename):
         pointcloud = load_point_cloud(filename)
         if self.pc_transforms:
@@ -72,8 +69,7 @@ class TextPointCloudDataset(Dataset):
 
     def _preprocess_batch_text(self, batch):
         return self.text_tokenizer.batch_encode_plus(
-            batch,
-            padding="longest", return_tensors="pt"
+            batch, padding="longest", return_tensors="pt"
         )
 
     def __len__(self):
@@ -98,8 +94,6 @@ class TextPointCloudDataset(Dataset):
             ]
             # false_point_cloud_id = 'f770b7a17bed6938'
 
-        # print(text_queries_id, true_point_cloud_id, false_point_cloud_id)
-
         true_pc_path = os.path.join(self.point_cloud_path, f"{true_point_cloud_id}.obj")
         false_pc_path = os.path.join(
             self.point_cloud_path, f"{false_point_cloud_id}.obj"
@@ -113,7 +107,9 @@ class TextPointCloudDataset(Dataset):
         return {
             "true_point_cloud": true_point_cloud,
             "false_point_cloud": false_point_cloud,
-            "text_query": text_sample
+            "text_query": text_sample,
+            "true_point_cloud_id": true_point_cloud_id,
+            "text_query_id": text_queries_id,
         }
 
     def collate_fn(self, batch):
@@ -124,7 +120,11 @@ class TextPointCloudDataset(Dataset):
             "false_point_clouds": torch.stack([x["false_point_cloud"] for x in batch])
             .float()
             .transpose(1, 2),
-            "text_queries": self._preprocess_batch_text([x["text_query"] for x in batch]),
+            "text_queries": self._preprocess_batch_text(
+                [x["text_query"] for x in batch]
+            ),
+            "true_point_cloud_ids": [x["true_point_cloud_id"] for x in batch],
+            "text_query_ids": [x["text_query_id"] for x in batch],
         }
 
         return batch_as_dict

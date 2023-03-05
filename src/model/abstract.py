@@ -1,4 +1,5 @@
 import abc
+import numpy as np
 import pytorch_lightning as pl
 from pytorch_lightning.utilities.types import (
     EVAL_DATALOADERS,
@@ -7,6 +8,7 @@ from pytorch_lightning.utilities.types import (
 from torch.utils.data import DataLoader
 import torch
 from torchvision import transforms
+from src.metrics.metrics import SHRECMetricEvaluator
 from src.dataset.text_pc_dataset import TextPointCloudDataset
 from src.utils.pc_transform import (
     Normalize,
@@ -22,6 +24,7 @@ class AbstractModel(pl.LightningModule):
         self.cfg = cfg
         self.train_dataset = None
         self.val_dataset = None
+        self.metric_evaluator = None
         self.init_model()
 
     def setup(self, stage):
@@ -40,6 +43,10 @@ class AbstractModel(pl.LightningModule):
             self.val_dataset = TextPointCloudDataset(
                 pc_transform=validation_transforms,
                 **self.cfg["dataset"]["val"]["params"],
+            )
+
+            self.metric_evaluator = SHRECMetricEvaluator(
+                embed_dim=self.cfg["model"]["params"]["embed_dim"]
             )
 
     @abc.abstractmethod
@@ -70,7 +77,7 @@ class AbstractModel(pl.LightningModule):
         output = self.forward(batch)
         # 2. Calculate loss
         loss = self.compute_loss(**output, batch=batch)
-        # 3. TODO: Update monitor
+        # 3. Update monitor
         self.log("train_loss", loss, on_step=True, on_epoch=True, prog_bar=True)
         return {"loss": loss}
 
@@ -79,8 +86,16 @@ class AbstractModel(pl.LightningModule):
         output = self.forward(batch)
         # 2. Calculate loss
         loss = self.compute_loss(**output, batch=batch)
-        # 3. TODO: Update metric for each batch
+        # 3. Update metric for each batch
         self.log("val_loss", loss, on_step=True, on_epoch=True, prog_bar=True)
+        self.metric_evaluator.append(
+            g_emb=output["true_pc_embedding_feats"],
+            q_emb=output["text_query_embedding_feats"],
+            query_ids=batch["text_query_ids"],
+            gallery_ids=batch["true_point_cloud_ids"],
+            target_ids=batch["true_point_cloud_ids"],
+        )
+
         return {"loss": loss}
 
     def validation_epoch_end(self, outputs) -> None:
@@ -91,8 +106,8 @@ class AbstractModel(pl.LightningModule):
         Args:
             outputs: output of validation step
         """
-        # TODO: add metric evaluation and reset
-        pass
+        self.log_dict(self.metric_evaluator.evaluate(), on_step=False, on_epoch=True)
+        self.metric_evaluator.reset()
 
     def train_dataloader(self) -> TRAIN_DATALOADERS:
         train_loader = DataLoader(
