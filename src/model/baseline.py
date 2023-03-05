@@ -8,11 +8,16 @@ class BaselineModel(AbstractModel):
     def init_model(self):
         self.pointnet = PointNet()
         self.lang_extractor = LangExtractor("bert-base-uncased", True)
+
+        self.lang_linear = nn.Sequential(
+            nn.Linear(self.lang_extractor.feature_dim, self.lang_extractor.feature_dim // 2),
+            nn.ReLU(),
+            nn.Linear(self.lang_extractor.feature_dim // 2, self.lang_extractor.feature_dim // 4),
+            nn.ReLU(),
+            nn.Linear(self.lang_extractor.feature_dim // 4, self.cfg["model"]["params"]["embed_dim"]),
+        )
         self.pc_linear = nn.Linear(
             self.pointnet.feature_dim, self.cfg["model"]["params"]["embed_dim"]
-        )
-        self.lang_linear = nn.Linear(
-            self.lang_extractor.feature_dim, self.cfg["model"]["params"]["embed_dim"]
         )
 
     def forward_pointnet(self, batch_pc):

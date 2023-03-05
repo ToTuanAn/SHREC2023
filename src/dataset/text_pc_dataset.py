@@ -70,19 +70,11 @@ class TextPointCloudDataset(Dataset):
             pointcloud = self.pc_transforms(pointcloud)
         return pointcloud
 
-    def _preprocess_text(self, input_text):
-        encoded_dict = self.text_tokenizer.encode_plus(
-            input_text,
-            add_special_tokens=True,
-            max_length=64,
-            pad_to_max_length=True,
-            return_attention_mask=True,
-            return_tensors="pt",
+    def _preprocess_batch_text(self, batch):
+        return self.text_tokenizer.batch_encode_plus(
+            batch,
+            padding="longest", return_tensors="pt"
         )
-        input_ids = torch.flatten(torch.tensor(encoded_dict["input_ids"]))
-        attention_mask = torch.flatten(torch.tensor(encoded_dict["attention_mask"]))
-
-        return input_ids, attention_mask
 
     def __len__(self):
         if self.stage == "train":
@@ -107,8 +99,6 @@ class TextPointCloudDataset(Dataset):
             # false_point_cloud_id = 'f770b7a17bed6938'
 
         # print(text_queries_id, true_point_cloud_id, false_point_cloud_id)
-        text_sample = self.text_queries_mapping[text_queries_id]
-        text_input_ids, text_attention_mask = self._preprocess_text(text_sample)
 
         true_pc_path = os.path.join(self.point_cloud_path, f"{true_point_cloud_id}.obj")
         false_pc_path = os.path.join(
@@ -118,11 +108,12 @@ class TextPointCloudDataset(Dataset):
         true_point_cloud = self._preprocess_pc(true_pc_path)
         false_point_cloud = self._preprocess_pc(false_pc_path)
 
+        text_sample = self.text_queries_mapping[text_queries_id]
+
         return {
             "true_point_cloud": true_point_cloud,
             "false_point_cloud": false_point_cloud,
-            "input_ids": text_input_ids,
-            "attention_mask": text_attention_mask,
+            "text_query": text_sample
         }
 
     def collate_fn(self, batch):
@@ -133,10 +124,7 @@ class TextPointCloudDataset(Dataset):
             "false_point_clouds": torch.stack([x["false_point_cloud"] for x in batch])
             .float()
             .transpose(1, 2),
-            "text_queries": {
-                "input_ids": torch.stack([x["input_ids"] for x in batch]),
-                "attention_mask": torch.stack([x["attention_mask"] for x in batch]),
-            },
+            "text_queries": self._preprocess_batch_text([x["text_query"] for x in batch]),
         }
 
         return batch_as_dict

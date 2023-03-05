@@ -35,6 +35,7 @@ class LangExtractor(ExtractorNetwork):
     def __init__(self, pretrained: str, freeze=False):
         super().__init__()
         self.config = AutoConfig.from_pretrained(pretrained)
+
         self.extractor = AutoModel.from_pretrained(pretrained, config=self.config)
         if freeze:
             self.freeze()

@@ -24,7 +24,7 @@ class InferenceDataset(Dataset):
         text_queries_folder_path = os.path.join(root_dir, "text_queries")
 
         text_queries_path = os.path.join(
-            text_queries_folder_path, "TextQuery_Test.csv"
+            text_queries_folder_path, "TextQuery_Train.csv"
         )
 
         model_id_path = os.path.join(text_queries_folder_path, "ModelID.csv")
