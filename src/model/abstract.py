@@ -89,8 +89,8 @@ class AbstractModel(pl.LightningModule):
         # 3. Update metric for each batch
         self.log("val_loss", loss, on_step=True, on_epoch=True, prog_bar=True)
         self.metric_evaluator.append(
-            g_emb=output["true_pc_embedding_feats"],
-            q_emb=output["text_query_embedding_feats"],
+            g_emb=output["true_pc_embedding_feats"].float(),
+            q_emb=output["text_query_embedding_feats"].float(),
             query_ids=batch["text_query_ids"],
             gallery_ids=batch["true_point_cloud_ids"],
             target_ids=batch["true_point_cloud_ids"],
@@ -106,7 +106,7 @@ class AbstractModel(pl.LightningModule):
         Args:
             outputs: output of validation step
         """
-        self.log_dict(self.metric_evaluator.evaluate(), on_step=False, on_epoch=True)
+        self.log_dict(self.metric_evaluator.evaluate(), prog_bar=True, on_step=False, on_epoch=True)
         self.metric_evaluator.reset()
 
     def train_dataloader(self) -> TRAIN_DATALOADERS:
@@ -126,7 +126,7 @@ class AbstractModel(pl.LightningModule):
         return val_loader
 
     def configure_optimizers(self):
-        optimizer = torch.optim.AdamW(self.parameters(), self.cfg["trainer"]["lr"])
+        optimizer = torch.optim.AdamW(self.parameters(), self.cfg["trainer"]["lr"], weight_decay=0.0001)
 
         scheduler = torch.optim.lr_scheduler.MultiStepLR(
             optimizer, milestones=[120, 250, 300], gamma=0.5

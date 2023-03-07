@@ -10,6 +10,7 @@ build/
 outputs/
 lightning_logs/
 runs/
+dataset/
 *.pyc
 # weights
 *.pt
