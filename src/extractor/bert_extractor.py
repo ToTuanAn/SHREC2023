@@ -50,8 +50,6 @@ class LangExtractor(ExtractorNetwork):
         feature = transformer_out.last_hidden_state
         feature = torch.mean(feature, dim=1)
 
-        # print(self.feature_dim)
-
         return feature
 
 

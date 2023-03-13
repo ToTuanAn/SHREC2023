@@ -54,7 +54,7 @@ def inference(cfg, pretrained_ckpt=None):
 
 
 if __name__ == '__main__':
-    pretrained_ckpt = "/home/totuanan/Workplace/SHREC2023/SHREC2023/runs/hcmus-shrec23-textANIMAR/yjr0hc3w/checkpoints/baseline-epoch=1439-train_loss=0.2775-val_loss=0.1107.ckpt"
+    pretrained_ckpt = "/home/totuanan/Workplace/SHREC2023/SHREC2023/runs/hcmus-shrec23-textANIMAR/gj7yo8qj/checkpoints/baseline-epoch=1270-train_loss=0.2654-val_loss=0.0820.ckpt"
     cfg_path = '/home/totuanan/Workplace/SHREC2023/SHREC2023/configs/template.yml'
 
     cfg = Opts(cfg=cfg_path).parse_args()

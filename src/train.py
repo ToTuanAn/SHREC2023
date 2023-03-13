@@ -1,7 +1,7 @@
 from lightning_fabric import seed_everything
 import pytorch_lightning as pl
 from pytorch_lightning.loggers.wandb import WandbLogger
-import wandb
+import datetime
 import torch
 from src.callback import CALLBACK_REGISTRY
 from src.model import MODEL_REGISTRY
@@ -11,8 +11,12 @@ from src.utils.opt import Opts
 def train(config):
     model = MODEL_REGISTRY.get(config["model"]["name"])(config)
 
+    time_str = datetime.datetime.now().strftime("%Y%m%d-%H%M%S")
+    run_name = f"{config['global']['name']}-{time_str}"
+
     wandb_logger = WandbLogger(
         project=config["global"]["project_name"],
+        name=run_name,
         save_dir=config["global"]["save_dir"],
         entity=config["global"]["username"],
         log_model="all",

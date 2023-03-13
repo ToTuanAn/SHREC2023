@@ -70,13 +70,13 @@ def evaluate(
     pre = np.mean(precision, axis=0)
     rec = np.mean(recall, axis=0)
     auc_ = auc(rec, pre)
-    _, ax = plt.subplots(figsize=(7, 8))
-    display = PrecisionRecallDisplay(recall=rec, precision=pre)
-    display.plot(ax=ax, name=f"Precision-recall curve")
-    ax.set_xlim([0.0, 1.0])
-    ax.set_ylim([0.0, 1.05])
-    if savefig:
-        plt.savefig("PR_curve.jpg")
+    # _, ax = plt.subplots(figsize=(7, 8))
+    # display = PrecisionRecallDisplay(recall=rec, precision=pre)
+    # display.plot(ax=ax, name=f"Precision-recall curve")
+    # ax.set_xlim([0.0, 1.0])
+    # ax.set_ylim([0.0, 1.05])
+    # if savefig:
+    #     plt.savefig("PR_curve.jpg")
 
     return {
         "NN": nn,

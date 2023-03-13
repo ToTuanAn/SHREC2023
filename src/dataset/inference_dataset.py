@@ -23,9 +23,7 @@ class InferenceDataset(Dataset):
 
         text_queries_folder_path = os.path.join(root_dir, "text_queries")
 
-        text_queries_path = os.path.join(
-            text_queries_folder_path, "TextQuery_Train.csv"
-        )
+        text_queries_path = os.path.join(text_queries_folder_path, "TextQuery_Test.csv")
 
         model_id_path = os.path.join(text_queries_folder_path, "ModelID.csv")
 
@@ -50,23 +48,13 @@ class InferenceDataset(Dataset):
             pointcloud = self.pc_transforms(pointcloud)
         return pointcloud
 
-    def _preprocess_text(self, input_text):
-        encoded_dict = self.text_tokenizer.encode_plus(
-            input_text,
-            add_special_tokens=True,
-            max_length=64,
-            pad_to_max_length=True,
-            return_attention_mask=True,
-            return_tensors="pt",
+    def _preprocess_batch_text(self, batch):
+        return self.text_tokenizer.batch_encode_plus(
+            batch, padding="longest", return_tensors="pt"
         )
-        input_ids = torch.flatten(torch.tensor(encoded_dict["input_ids"]))
-        attention_mask = torch.flatten(torch.tensor(encoded_dict["attention_mask"]))
-
-        return input_ids, attention_mask
 
     def __len__(self):
         return len(self.inference_test)
-
 
     def __getitem__(self, idx):
         point_cloud_id, text_id = self.inference_test[idx]

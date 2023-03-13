@@ -5,9 +5,12 @@ from pytorch_lightning.utilities.types import (
     EVAL_DATALOADERS,
     TRAIN_DATALOADERS,
 )
+from torch import nn
 from torch.utils.data import DataLoader
 import torch
 from torchvision import transforms
+from src.dataset.inference_dataset import InferenceDataset
+from src.extractor.base_extractor import ExtractorNetwork
 from src.metrics.metrics import SHRECMetricEvaluator
 from src.dataset.text_pc_dataset import TextPointCloudDataset
 from src.utils.pc_transform import (
@@ -28,7 +31,7 @@ class AbstractModel(pl.LightningModule):
         self.init_model()
 
     def setup(self, stage):
-        if stage != "predict":
+        if stage in ["fit", "validate", "test"]:
             train_transforms = transforms.Compose(
                 [Normalize(), RandRotation_z(), RandomNoise(), ToTensor()]
             )
@@ -48,6 +51,13 @@ class AbstractModel(pl.LightningModule):
             self.metric_evaluator = SHRECMetricEvaluator(
                 embed_dim=self.cfg["model"]["params"]["embed_dim"]
             )
+        elif stage == "predict":
+            test_transforms = transforms.Compose([Normalize(), ToTensor()])
+
+            test_set = InferenceDataset(
+                root_dir="../dataset", pc_transform=test_transforms, stage="train"
+            )
+            test_loader = DataLoader(dataset=test_set, batch_size=1)
 
     @abc.abstractmethod
     def init_model(self):
@@ -89,11 +99,11 @@ class AbstractModel(pl.LightningModule):
         # 3. Update metric for each batch
         self.log("val_loss", loss, on_step=True, on_epoch=True, prog_bar=True)
         self.metric_evaluator.append(
-            g_emb=output["true_pc_embedding_feats"].float(),
-            q_emb=output["text_query_embedding_feats"].float(),
-            query_ids=batch["text_query_ids"],
-            gallery_ids=batch["true_point_cloud_ids"],
-            target_ids=batch["true_point_cloud_ids"],
+            g_emb=output["pc_embedding_feats"].float(),
+            q_emb=output["query_embedding_feats"].float(),
+            query_ids=batch["query_ids"],
+            gallery_ids=batch["point_cloud_ids"],
+            target_ids=batch["point_cloud_ids"],
         )
 
         return {"loss": loss}
@@ -106,7 +116,12 @@ class AbstractModel(pl.LightningModule):
         Args:
             outputs: output of validation step
         """
-        self.log_dict(self.metric_evaluator.evaluate(), prog_bar=True, on_step=False, on_epoch=True)
+        self.log_dict(
+            self.metric_evaluator.evaluate(),
+            prog_bar=True,
+            on_step=False,
+            on_epoch=True,
+        )
         self.metric_evaluator.reset()
 
     def train_dataloader(self) -> TRAIN_DATALOADERS:
@@ -126,7 +141,9 @@ class AbstractModel(pl.LightningModule):
         return val_loader
 
     def configure_optimizers(self):
-        optimizer = torch.optim.AdamW(self.parameters(), self.cfg["trainer"]["lr"], weight_decay=0.0001)
+        optimizer = torch.optim.AdamW(
+            self.parameters(), self.cfg["trainer"]["lr"], weight_decay=0.0001
+        )
 
         scheduler = torch.optim.lr_scheduler.MultiStepLR(
             optimizer, milestones=[120, 250, 300], gamma=0.5
@@ -136,3 +153,25 @@ class AbstractModel(pl.LightningModule):
             "optimizer": optimizer,
             "lr_scheduler": {"scheduler": scheduler, "interval": "epoch"},
         }
+
+
+class MLP(nn.Module):
+    # layer_sizes[0] is the dimension of the input
+    # layer_sizes[-1] is the dimension of the output
+    def __init__(self, extractor: ExtractorNetwork, latent_dim=128):
+        super().__init__()
+        self.extractor = extractor
+        self.feature_dim = extractor.feature_dim
+        # mlp = 4 layers, feature_dim -> feature_dim / 2 -> feature_dim / 4 -> latent_dim
+        self.mlp = nn.Sequential(
+            nn.Linear(self.feature_dim, self.feature_dim // 2),
+            nn.ReLU(),
+            nn.Linear(self.feature_dim // 2, self.feature_dim // 4),
+            nn.ReLU(),
+            nn.Linear(self.feature_dim // 4, latent_dim),
+        )
+
+    def forward(self, x):
+        x = self.extractor.get_embedding(x)
+        x = self.mlp(x)
+        return x

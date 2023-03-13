@@ -73,5 +73,7 @@ class FaissRetrieval:
                             "target_ids": tids,
                         }
                     )
+                    
+            save_json_results(results_dict, save_results)
 
         return top_k_scores_all, top_k_indexes_all
