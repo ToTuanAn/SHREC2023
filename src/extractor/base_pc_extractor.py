@@ -110,6 +110,6 @@ class PointNetExtractor(ExtractorNetwork):
         self.feature_dim = self.extractor.feature_dim
 
     def forward(self, batch):
-        output, _, _ = self.pointnet.forward(batch)
+        output, _, _ = self.extractor.forward(batch)
 
         return output

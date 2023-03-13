@@ -19,7 +19,6 @@ def train(config):
         name=run_name,
         save_dir=config["global"]["save_dir"],
         entity=config["global"]["username"],
-        log_model="all",
     )
     wandb_logger.watch((model))
     wandb_logger.experiment.config.update(config)

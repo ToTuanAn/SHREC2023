@@ -49,7 +49,7 @@ class AbstractModel(pl.LightningModule):
             )
 
             self.metric_evaluator = SHRECMetricEvaluator(
-                embed_dim=self.cfg["model"]["params"]["embed_dim"]
+                embed_dim=self.cfg["model"]["embed_dim"]
             )
         elif stage == "predict":
             test_transforms = transforms.Compose([Normalize(), ToTensor()])
@@ -71,36 +71,37 @@ class AbstractModel(pl.LightningModule):
         raise NotImplementedError
 
     @abc.abstractmethod
-    def compute_loss(self, batch, **kwargs):
+    def compute_loss(self, forwarded_batch, input_batch):
         """
-        Function to compute
+        Function to compute loss
         Args:
-            batch (_type_): _description_
+            forwarded_batch: output of `forward` method
+            input_batch: input of batch method
 
-        Raises:
-            NotImplementedError: _description_
+        Returns:
+            loss: computed loss
         """
         raise NotImplementedError
 
     def training_step(self, batch, batch_idx):
         # 1. get embeddings from model
-        output = self.forward(batch)
+        forwarded_batch = self.forward(batch)
         # 2. Calculate loss
-        loss = self.compute_loss(**output, batch=batch)
+        loss = self.compute_loss(forwarded_batch=forwarded_batch, input_batch=batch)
         # 3. Update monitor
         self.log("train_loss", loss, on_step=True, on_epoch=True, prog_bar=True)
         return {"loss": loss}
 
     def validation_step(self, batch, batch_idx):
         # 1. Get embeddings from model
-        output = self.forward(batch)
+        forwarded_batch = self.forward(batch)
         # 2. Calculate loss
-        loss = self.compute_loss(**output, batch=batch)
+        loss = self.compute_loss(forwarded_batch=forwarded_batch, input_batch=batch)
         # 3. Update metric for each batch
         self.log("val_loss", loss, on_step=True, on_epoch=True, prog_bar=True)
         self.metric_evaluator.append(
-            g_emb=output["pc_embedding_feats"].float(),
-            q_emb=output["query_embedding_feats"].float(),
+            g_emb=forwarded_batch["pc_embedding_feats"].float(),
+            q_emb=forwarded_batch["query_embedding_feats"].float(),
             query_ids=batch["query_ids"],
             gallery_ids=batch["point_cloud_ids"],
             target_ids=batch["point_cloud_ids"],
