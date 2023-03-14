@@ -1,53 +1,117 @@
+import os
+from lightning_fabric import seed_everything
+import numpy as np
+from src.dataset.text_pc_dataset import PointCloudOnlyDataset, TextOnlyDataSet
+from src.model import MODEL_REGISTRY
+from src.utils.opt import Opts
+from src.utils.pc_transform import Normalize, ToTensor
 import torch
+from torch.utils.data import DataLoader
 from src.utils.retriever import FaissRetrieval
-import tqdm
+from torchvision.transforms import transforms
+from tqdm import tqdm
 
-def inference(config):
-    test_transforms = transforms.Compose([ Normalize(),
-                                            ToTensor()])
 
-    test_set = InferenceDataset(root_dir=cfg["dataset"]["val"], pc_transform=test_transforms, stage='train')
-    test_loader = DataLoader(dataset=test_set, batch_size=1)
-
-    model = MODEL_REGISTRY.get(cfg["model"]["name"])(cfg)
-    model = model.load_from_checkpoint(pretrained_ckpt, cfg=cfg, strict=True)
+def inference_loop(model, data_loader, obj_value_key, obj_id_key, device):
     model.eval()
-    gallery_embeddings = []
-    query_embeddings = []
-    retriever = FaissRetrieval(dimension=dimension, cpu=True) # Temporarily use CPU to retrieve (avoid OOM)
-    
-    obj_embedder.eval()
-    query_embedder.eval()
-    query_ids = []
-    target_ids = []
-    gallery_ids = []
-    print('- Evaluation started...')
-    print('- Extracting embeddings...')
+    obj_ids = []
+    obj_embeddings = []
+    print(f"- Extracting embeddings of {obj_value_key}...")
     with torch.no_grad():
-        for step, batch in tqdm(enumerate(dl), total=len(dl)):
-            g_emb = obj_embedder(batch[obj_input].to(device))
-            q_emb = query_embedder(batch[query_input].to(device))
-            gallery_embeddings.append(g_emb.detach().cpu().numpy())
-            query_embeddings.append(q_emb.detach().cpu().numpy())
-            query_ids.extend(batch['query_ids'])
-            gallery_ids.extend(batch['gallery_ids'])
-            target_ids.extend(batch['gallery_ids'])
+        for step, batch in tqdm(enumerate(data_loader), total=len(data_loader)):
+            obj_emb = model(batch[obj_value_key].to(device))
+            obj_embeddings.append(obj_emb.detach().cpu().numpy())
+            obj_ids.extend(batch[obj_id_key])
 
-    max_k = len(gallery_ids) # retrieve all available gallery items
-    query_embeddings = np.concatenate(query_embeddings, axis=0)
-    gallery_embeddings = np.concatenate(gallery_embeddings, axis=0)
-    print('- Calculating similarity...')
+    obj_embeddings = np.concatenate(obj_embeddings, axis=0)
+    return obj_embeddings, obj_ids
+
+
+def save_result_to_csv(filepath, top_k_indexes_all, query_ids, pc_ids):
+    folder_name = os.path.dirname(filepath)
+    os.makedirs(folder_name, exist_ok=True)
+    max_k = top_k_indexes_all.shape[1]
+
+    with open(filepath, "w") as f:
+        for i, query_id in enumerate(query_ids):
+            f.write(query_id)
+            f.write(",")
+            for j in range(max_k):
+                f.write(pc_ids[top_k_indexes_all[i, j]])
+                if j < max_k - 1:
+                    f.write(",")
+                else:
+                    f.write("\n")
+
+
+def inference(cfg):
+    # point cloud dataloader for inference
+    test_pc_transforms = transforms.Compose([Normalize(), ToTensor()])
+    pc_testset = PointCloudOnlyDataset(
+        **cfg["dataset"]["point_cloud"]["params"], pc_transform=test_pc_transforms
+    )
+    pc_test_loader = DataLoader(
+        dataset=pc_testset,
+        collate_fn=pc_testset.collate_fn,
+        **cfg["data_loader"]["point_cloud"]["params"],
+    )
+
+    # text dataloader for inference
+    text_testset = TextOnlyDataSet(**cfg["dataset"]["text"]["params"])
+    text_test_loader = DataLoader(
+        dataset=text_testset,
+        collate_fn=text_testset.collate_fn,
+        **cfg["data_loader"]["text"]["params"],
+    )
+
+    # model for inference
+    model = MODEL_REGISTRY.get(cfg["model"]["name"])(cfg)
+    model = model.load_from_checkpoint(
+        cfg["model"]["pretrained_ckpt"], cfg=cfg, strict=True
+    )
+
+    # side-setting
+    device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+    retriever = FaissRetrieval(dimension=cfg["model"]["embed_dim"], cpu=True)
+
+    print("- Evaluation started...")
+
+    query_embeddings, query_ids = inference_loop(
+        model=model.lang_encoder,
+        data_loader=text_test_loader,
+        obj_value_key="queries",
+        obj_id_key="query_ids",
+        device=device,
+    )
+
+    pc_embeddings, pc_ids = inference_loop(
+        model=model.pc_encoder,
+        data_loader=pc_test_loader,
+        obj_value_key="point_clouds",
+        obj_id_key="point_cloud_ids",
+        device=device,
+    )
+
+    print("- Calculating similarity...")
+
+    max_k = len(pc_embeddings)
     top_k_scores_all, top_k_indexes_all = retriever.similarity_search(
-            query_embeddings=query_embeddings,
-            gallery_embeddings=gallery_embeddings,
-            top_k=max_k,
-            query_ids=query_ids, target_ids=target_ids, gallery_ids=gallery_ids,
-            save_results="temps/query_results.json"
-        )
+        query_embeddings=query_embeddings,
+        gallery_embeddings=pc_embeddings,
+        top_k=max_k,
+        query_ids=query_ids,
+        gallery_ids=pc_ids,
+        save_results="temps/query_results.json",
+    )
 
-    model_labels = np.array(encode_labels(query_ids), dtype=np.int32)
-    rank_matrix = top_k_indexes_all
+    print("- Done calculate similarity...")
 
-    np.savetxt("temps/rank_matrix.csv", rank_matrix, delimiter=",",fmt='%i')
-    print('- Evaluation results:')
-    print_results(evaluate(rank_matrix, model_labels, model_labels))
+    print("Saving result as csv file...")
+    save_result_to_csv("temps/query_results.csv", top_k_indexes_all, query_ids, pc_ids)
+    print("Saved!")
+
+
+if __name__ == "__main__":
+    cfg = Opts(cfg="configs/template.yml").parse_args()
+    seed_everything(seed=cfg["global"]["SEED"])
+    inference(cfg)

@@ -19,7 +19,7 @@ class BaselineModel(AbstractModel):
 
         self.constrastive_loss = NTXentLoss()
         self.xbm = CrossBatchMemory(
-            loss=self.constrastive_loss,
+            loss=NTXentLoss(),
             embedding_size=self.embed_dim,
             memory_size=self.cfg["model"]["xbm"]["memory_size"],
         )
@@ -54,9 +54,8 @@ class BaselineModel(AbstractModel):
                 forwarded_batch["query_embedding_feats"],
             ]
         )  # (batch_size * 2, embed_dim)
-        emb_len = emb.shape[0]
 
-        # label is categoricalized id of queries (but repeated 2 time since we concated the pc and query)
+        # label is categoricalized id of queries (but repeated 2 time since we concatenated the pc and query)
         labels = torch.tensor(
             LabelEncoder().fit_transform(input_batch["query_ids"]), dtype=torch.int
         ).repeat(

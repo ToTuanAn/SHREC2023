@@ -7,6 +7,15 @@ import numpy as np
 import os.path as osp
 
 
+def save_json_results(query_results, outpath):
+    folder_name = osp.dirname(outpath)
+    os.makedirs(folder_name, exist_ok=True)
+    with open(outpath, "w") as f:
+        json.dump(query_results, f)
+
+    print(f"Save query results to  {outpath}")
+
+
 class FaissRetrieval:
     """
     Compute the accuracy of the model.
@@ -73,7 +82,7 @@ class FaissRetrieval:
                             "target_ids": tids,
                         }
                     )
-                    
+
             save_json_results(results_dict, save_results)
 
         return top_k_scores_all, top_k_indexes_all
