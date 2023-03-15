@@ -1,12 +1,12 @@
+import torch
 from lightning_fabric import seed_everything
 import pytorch_lightning as pl
 from pytorch_lightning.loggers.wandb import WandbLogger
 import datetime
-import torch
+
 from src.callback import CALLBACK_REGISTRY
 from src.model import MODEL_REGISTRY
 from src.utils.opt import Opts
-
 
 def train(config):
     model = MODEL_REGISTRY.get(config["model"]["name"])(config)
@@ -42,7 +42,7 @@ def train(config):
         logger=wandb_logger,
         callbacks=callbacks,
         num_sanity_val_steps=-1,  # Sanity full validation required for visualization callbacks
-        deterministic=True,
+        deterministic=False,
         auto_lr_find=True,
     )
 

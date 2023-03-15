@@ -6,6 +6,7 @@ data/
 dataset/
 checkpoints/
 tmp/
+temps/
 build/
 outputs/
 lightning_logs/

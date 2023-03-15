@@ -1,21 +1,32 @@
 from pytorch_metric_learning.losses import CrossBatchMemory, NTXentLoss
 from sklearn.preprocessing import LabelEncoder
-import torch.nn as nn
 import torch
-
+from src.extractor import EXTRACTOR_REGISTRY
 from src.model.abstract import MLP, AbstractModel
-from src.extractor.base_pc_extractor import PointNetExtractor
-from src.extractor.bert_extractor import LangExtractor
 
 
 class BaselineModel(AbstractModel):
     def init_model(self):
-        self.pc_extractor = PointNetExtractor()
-        self.lang_extractor = LangExtractor(pretrained="bert-base-uncased", freeze=True)
+        extractor_cfg = self.cfg["model"]["extractor"]
+        self.pc_extractor = EXTRACTOR_REGISTRY.get(extractor_cfg["pointcloud"]["name"])(
+            **extractor_cfg["pointcloud"]["params"]
+        )
+        self.lang_extractor = EXTRACTOR_REGISTRY.get(extractor_cfg["text"]["name"])(
+            **extractor_cfg["text"]["params"]
+        )
         self.embed_dim = self.cfg["model"]["embed_dim"]
 
-        self.lang_encoder = MLP(self.lang_extractor, self.embed_dim)
-        self.pc_encoder = MLP(self.pc_extractor, self.embed_dim)
+        encoder_cfg = self.cfg["model"]["encoder"]
+        self.lang_encoder = MLP(
+            self.lang_extractor,
+            self.embed_dim,
+            num_hidden_layer=encoder_cfg["pointcloud"]["num_hidden_layer"],
+        )
+        self.pc_encoder = MLP(
+            self.pc_extractor,
+            self.embed_dim,
+            num_hidden_layer=encoder_cfg["text"]["num_hidden_layer"],
+        )
 
         self.constrastive_loss = NTXentLoss()
         self.xbm = CrossBatchMemory(

@@ -9,7 +9,6 @@ from torch import nn
 from torch.utils.data import DataLoader
 import torch
 from torchvision import transforms
-from src.dataset.inference_dataset import InferenceDataset
 from src.extractor.base_extractor import ExtractorNetwork
 from src.metrics.metrics import SHRECMetricEvaluator
 from src.dataset.text_pc_dataset import TextPointCloudDataset
@@ -51,13 +50,6 @@ class AbstractModel(pl.LightningModule):
             self.metric_evaluator = SHRECMetricEvaluator(
                 embed_dim=self.cfg["model"]["embed_dim"]
             )
-        elif stage == "predict":
-            test_transforms = transforms.Compose([Normalize(), ToTensor()])
-
-            test_set = InferenceDataset(
-                root_dir="../dataset", pc_transform=test_transforms, stage="train"
-            )
-            test_loader = DataLoader(dataset=test_set, batch_size=1)
 
     @abc.abstractmethod
     def init_model(self):
@@ -100,8 +92,8 @@ class AbstractModel(pl.LightningModule):
         # 3. Update metric for each batch
         self.log("val_loss", loss, on_step=True, on_epoch=True, prog_bar=True)
         self.metric_evaluator.append(
-            g_emb=forwarded_batch["pc_embedding_feats"].float(),
-            q_emb=forwarded_batch["query_embedding_feats"].float(),
+            g_emb=forwarded_batch["pc_embedding_feats"].float().clone().detach(),
+            q_emb=forwarded_batch["query_embedding_feats"].float().clone().detach(),
             query_ids=batch["query_ids"],
             gallery_ids=batch["point_cloud_ids"],
             target_ids=batch["point_cloud_ids"],
@@ -147,7 +139,7 @@ class AbstractModel(pl.LightningModule):
         )
 
         scheduler = torch.optim.lr_scheduler.MultiStepLR(
-            optimizer, milestones=[120, 250, 300], gamma=0.5
+            optimizer, **self.cfg["trainer"]["lr_scheduler"]["params"]
         )
 
         return {
@@ -159,18 +151,25 @@ class AbstractModel(pl.LightningModule):
 class MLP(nn.Module):
     # layer_sizes[0] is the dimension of the input
     # layer_sizes[-1] is the dimension of the output
-    def __init__(self, extractor: ExtractorNetwork, latent_dim=128):
+    def __init__(self, extractor: ExtractorNetwork, latent_dim=128, num_hidden_layer=2):
         super().__init__()
         self.extractor = extractor
         self.feature_dim = extractor.feature_dim
-        # mlp = 4 layers, feature_dim -> feature_dim / 2 -> feature_dim / 4 -> latent_dim
-        self.mlp = nn.Sequential(
-            nn.Linear(self.feature_dim, self.feature_dim // 2),
-            nn.ReLU(),
-            nn.Linear(self.feature_dim // 2, self.feature_dim // 4),
-            nn.ReLU(),
-            nn.Linear(self.feature_dim // 4, latent_dim),
-        )
+
+        layers = []
+        current_reduced_dim = self.feature_dim
+        for i in range(num_hidden_layer):
+            layers.append(nn.Linear(current_reduced_dim, current_reduced_dim // 2))
+            layers.append(nn.ReLU())
+            current_reduced_dim //= 2
+
+        assert (
+            current_reduced_dim >= latent_dim
+        ), f"Reduced dim cannot less than embed dim ({current_reduced_dim} < {latent_dim})!"
+
+        layers.append(nn.Linear(current_reduced_dim, latent_dim))
+
+        self.mlp = nn.Sequential(*layers)
 
     def forward(self, x):
         x = self.extractor.get_embedding(x)

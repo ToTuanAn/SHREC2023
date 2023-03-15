@@ -10,10 +10,12 @@ from torch.utils.data import DataLoader
 from src.utils.retriever import FaissRetrieval
 from torchvision.transforms import transforms
 from tqdm import tqdm
+import datetime
 
 
 def inference_loop(model, data_loader, obj_value_key, obj_id_key, device):
     model.eval()
+    model.to(device)
     obj_ids = []
     obj_embeddings = []
     print(f"- Extracting embeddings of {obj_value_key}...")
@@ -95,19 +97,23 @@ def inference(cfg):
     print("- Calculating similarity...")
 
     max_k = len(pc_embeddings)
+    timestamp = datetime.datetime.now().strftime("%Y-%m-%d_%H-%M-%S")
+
     top_k_scores_all, top_k_indexes_all = retriever.similarity_search(
         query_embeddings=query_embeddings,
         gallery_embeddings=pc_embeddings,
         top_k=max_k,
         query_ids=query_ids,
         gallery_ids=pc_ids,
-        save_results="temps/query_results.json",
+        save_results=f"temps/query_results_{timestamp}.json",
     )
 
     print("- Done calculate similarity...")
 
     print("Saving result as csv file...")
-    save_result_to_csv("temps/query_results.csv", top_k_indexes_all, query_ids, pc_ids)
+    save_result_to_csv(
+        f"temps/query_results_{timestamp}.csv", top_k_indexes_all, query_ids, pc_ids
+    )
     print("Saved!")
 
 

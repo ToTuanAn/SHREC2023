@@ -50,6 +50,8 @@ class FaissRetrieval:
         """
         Compute the similarity between queries and gallery embeddings.
         """
+        faiss.normalize_L2(gallery_embeddings)
+        faiss.normalize_L2(query_embeddings)
 
         self.faiss_pool.reset()
         self.faiss_pool.add(gallery_embeddings)

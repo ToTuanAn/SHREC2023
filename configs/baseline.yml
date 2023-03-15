@@ -10,16 +10,16 @@ global:
 dataset:
   train:
     params:
-      text_queries_path: "data/TextANIMAR2023/Train/TextQuery_Train.csv"
-      pc_ids_path: "data/TextANIMAR2023/3D_Model_References/References.csv"
-      pc_dir: "data/TextANIMAR2023/3D_Model_References/References"
-      ground_truth_path: "data/TextANIMAR2023/Train/TextQuery_GT_Train.csv"
+      text_queries_path: "dataset/csv/TextQuery_Train.csv"
+      pc_ids_path: "dataset/csv/ModelID.csv"
+      pc_dir: "dataset/PC_OBJ"
+      ground_truth_path: "dataset/csv/TextQuery_GT_Train_v2.csv"
   val:
     params:
-      text_queries_path: "data/TextANIMAR2023/Train/TextQuery_Train.csv"
-      pc_ids_path: "data/TextANIMAR2023/3D_Model_References/References.csv"
-      pc_dir: "data/TextANIMAR2023/3D_Model_References/References"
-      ground_truth_path: "data/TextANIMAR2023/Train/TextQuery_GT_Train.csv"
+      text_queries_path: "dataset/csv/TextQuery_Train.csv"
+      pc_ids_path: "dataset/csv/ModelID.csv"
+      pc_dir: "dataset/PC_OBJ"
+      ground_truth_path: "dataset/csv/TextQuery_GT_Val_v2.csv"
 data_loader:
   train:
     params:
@@ -31,13 +31,35 @@ data_loader:
       num_workers: 2
       batch_size: 16
 model:
-  name: "BaselineModel"
+  name: BaselineModel
   embed_dim: 128
   xbm:
-    enable_epoch: 1000
+    enable_epoch: 1000000
     memory_size: 1024
+  extractor:
+    pointcloud:
+      name: CurveNet
+      params: {}
+    text:
+      name: LangExtractor
+      params:
+        pretrained: bert-base-uncased
+        freeze: True
+  encoder:
+    pointcloud:
+      num_hidden_layer: 2
+    text:
+      num_hidden_layer: 2
 trainer:
   lr: 0.001
+  lr_scheduler:
+    params:
+      milestones:
+        - 120
+        - 250
+        - 350
+        - 500
+      gamma: 0.5
   use_fp16: false
   debug: false
   num_epochs: 10000
@@ -48,8 +70,8 @@ trainer:
 callbacks:
   - name: ModelCheckpoint
     params:
-      filename: "baseline-{epoch}-{train_loss:.4f}-{val_loss:.4f}"
-      monitor: "val_loss"
+      filename: "baseline-{epoch}-{NN:.4f}-{mAP:.4f}-{train_loss:.4f}-{val_loss:.4f}"
+      monitor: "NN"
       verbose: True
-      save_top_k: 3
-      mode: min
+      save_top_k: 10
+      mode: max
