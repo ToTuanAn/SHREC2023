@@ -38,7 +38,7 @@ model:
     memory_size: 1024
   extractor:
     pointcloud:
-      name: CurveNet
+      name: PointNetExtractor
       params: {}
     text:
       name: LangExtractor
@@ -47,9 +47,9 @@ model:
         freeze: True
   encoder:
     pointcloud:
-      num_hidden_layer: 2
+      num_hidden_layer: 1
     text:
-      num_hidden_layer: 2
+      num_hidden_layer: 1
 trainer:
   lr: 0.001
   lr_scheduler:

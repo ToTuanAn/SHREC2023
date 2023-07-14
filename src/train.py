@@ -1,5 +1,5 @@
 import torch
-from lightning_fabric import seed_everything
+from pytorch_lightning.trainer import seed_everything
 import pytorch_lightning as pl
 from pytorch_lightning.loggers.wandb import WandbLogger
 import datetime
@@ -21,7 +21,7 @@ def train(config):
         entity=config["global"]["username"],
     )
     wandb_logger.watch((model))
-    wandb_logger.experiment.config.update(config)
+    # wandb_logger.experiment.config.update(config)
 
     callbacks = [
         CALLBACK_REGISTRY.get(mcfg["name"])(**mcfg["params"])
@@ -44,9 +44,10 @@ def train(config):
         num_sanity_val_steps=-1,  # Sanity full validation required for visualization callbacks
         deterministic=False,
         auto_lr_find=True,
+        resume_from_checkpoint=config["global"]["resume"]
     )
 
-    trainer.fit(model, ckpt_path=config["global"]["resume"])
+    trainer.fit(model)
 
 
 if __name__ == "__main__":
